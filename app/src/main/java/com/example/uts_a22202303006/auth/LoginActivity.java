@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+import es.dmoral.toasty.Toasty;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -133,7 +134,7 @@ public class LoginActivity extends AppCompatActivity {
                             editor.putString("foto", foto);
                             editor.apply();
 
-                            Toast.makeText(LoginActivity.this, "Login Successful", Toast.LENGTH_SHORT).show();
+                            Toasty.success(LoginActivity.this, "Login Successful", Toast.LENGTH_SHORT, true).show();
                             startActivity(new Intent(LoginActivity.this, MainActivity.class));
                             finish();
                         } else {

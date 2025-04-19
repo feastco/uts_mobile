@@ -13,6 +13,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import es.dmoral.toasty.Toasty;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -75,6 +76,8 @@ public class ProductDetailDialog extends BottomSheetDialogFragment {
         TextView textViewHargaDiskon = view.findViewById(R.id.textViewHargaDiskon);
         TextView textViewDeskripsi = view.findViewById(R.id.textViewDeskripsiDetail);
         TextView textViewStok = view.findViewById(R.id.textViewStokDetail);
+        TextView textViewAvailability = view.findViewById(R.id.textViewAvailability);
+        TextView textViewCategory = view.findViewById(R.id.textViewCategory);
         ImageButton imageButtonCart = view.findViewById(R.id.imageButtonCart);
         Button buttonClose = view.findViewById(R.id.buttonClose);
 
@@ -95,6 +98,23 @@ public class ProductDetailDialog extends BottomSheetDialogFragment {
             imageButtonCart.setEnabled(true);
             imageButtonCart.setAlpha(1f);
         }
+        // Set availability text and color based on stock
+        if (product.getStok() > 0) {
+            textViewAvailability.setText("Tersedia");
+            textViewAvailability.setTextColor(getResources().getColor(R.color.primary));
+        } else {
+            textViewAvailability.setText("Tidak Tersedia");
+            textViewAvailability.setTextColor(getResources().getColor(R.color.error));
+        }
+
+// Set category (assuming product has a getKategori method)
+// If not, you'll need to add this property to your Product class
+        if (product.getKategori() != null && !product.getKategori().isEmpty()) {
+            textViewCategory.setText("Kategori: " + product.getKategori());
+        } else {
+            textViewCategory.setText("Kategori: -");
+        }
+
 
         // Handle price display based on discount
         if (product.getDiskonJual() > 0) {
@@ -122,7 +142,7 @@ public class ProductDetailDialog extends BottomSheetDialogFragment {
 
         imageButtonCart.setOnClickListener(v -> {
             if (product.getStok() == 0) {
-                Toast.makeText(requireContext(), "Produk habis, tidak dapat ditambahkan ke keranjang", Toast.LENGTH_SHORT).show();
+                Toasty.error(requireContext(), "Produk habis, tidak dapat ditambahkan ke keranjang", Toast.LENGTH_SHORT, true).show();
                 return;
             }
 
@@ -139,7 +159,7 @@ public class ProductDetailDialog extends BottomSheetDialogFragment {
             for (Product p : listcart) {
                 if (p.getKode().equals(product.getKode())) {
                     if (p.getQty() >= product.getStok()) {
-                        Toast.makeText(requireContext(), "Stok tidak mencukupi", Toast.LENGTH_SHORT).show();
+                        Toasty.warning(requireContext(), "Stok tidak mencukupi", Toast.LENGTH_SHORT, true).show();
                         return;
                     }
                     p.setQty(p.getQty() + 1);
@@ -162,7 +182,7 @@ public class ProductDetailDialog extends BottomSheetDialogFragment {
                 ((MainActivity) getActivity()).updateCartBadge();
             }
 
-            Toast.makeText(requireContext(), "Produk ditambahkan ke keranjang", Toast.LENGTH_SHORT).show();
+            Toasty.success(requireContext(), "Produk ditambahkan ke keranjang", Toast.LENGTH_SHORT, true).show();
         });
 
         buttonClose.setOnClickListener(v -> dismiss());

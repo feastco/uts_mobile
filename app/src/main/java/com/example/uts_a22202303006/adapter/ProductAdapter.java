@@ -9,6 +9,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import es.dmoral.toasty.Toasty;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -123,7 +124,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
 
         holder.btnAddToCart.setOnClickListener(v -> {
             if (product.getStok() <= 0) {
-                Toast.makeText(fragment.getContext(), "Produk tidak tersedia", Toast.LENGTH_SHORT).show();
+                Toasty.error(fragment.getContext(), "Produk tidak tersedia", Toast.LENGTH_SHORT, true).show();
                 return;
             }
 
@@ -145,7 +146,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
             for (Product p : listcart) {
                 if (p.getKode().equals(product.getKode())) {
                     if (p.getQty() >= product.getStok()) {
-                        Toast.makeText(fragment.getContext(), "Stok tidak mencukupi", Toast.LENGTH_SHORT).show();
+                        Toasty.warning(fragment.getContext(), "Stok tidak mencukupi", Toast.LENGTH_SHORT, true).show();
                         return;
                     }
                     p.setQty(p.getQty() + 1);
@@ -174,7 +175,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
                 ((MainActivity) fragment.getActivity()).updateCartBadge();
             }
 
-            Toast.makeText(fragment.getContext(), "Produk ditambahkan ke keranjang", Toast.LENGTH_SHORT).show();
+            Toasty.success(fragment.getContext(), "Produk ditambahkan ke keranjang", Toast.LENGTH_SHORT, true).show();
         });
     }
 

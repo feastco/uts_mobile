@@ -12,6 +12,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import es.dmoral.toasty.Toasty;
+
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
@@ -103,7 +105,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
                 notifyCartQtyChanged();
             } else {
                 // Show a message indicating that the maximum available stock has been reached
-                Toast.makeText(v.getContext(), "Stok maksimum telah tercapai", Toast.LENGTH_SHORT).show();
+                Toasty.warning(v.getContext(), "Stok maksimum telah tercapai", Toast.LENGTH_SHORT, true).show();
             }
         });
 
@@ -137,7 +139,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
                             notifyCartTotalChanged();
                             notifyCartQtyChanged();
 
-                            Toast.makeText(v.getContext(), "Berhasil menghapus: " + removedProduct.getMerk(), Toast.LENGTH_SHORT).show();
+                            Toasty.success(v.getContext(), "Berhasil menghapus: " + removedProduct.getMerk(), Toast.LENGTH_SHORT, true).show();
                         })
                         .setNegativeButton("Batal", null)
                         .show();

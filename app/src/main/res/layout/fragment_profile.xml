@@ -68,8 +68,7 @@
                     android:layout_height="wrap_content"
                     android:text="Guest@example.com"
                     android:textColor="@color/text_secondary"
-                    android:textSize="14sp"
-                    android:layout_marginTop="4dp"/>
+                    android:textSize="14sp"/>
             </LinearLayout>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>

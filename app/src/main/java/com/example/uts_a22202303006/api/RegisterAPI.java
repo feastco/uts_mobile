@@ -45,6 +45,7 @@ public interface RegisterAPI {
             @Field("provinsi") String provinsi,
             @Field("telp") String telp,
             @Field("kodepos") String kodepos,
+            @Field("foto") String foto,
             @Field("email") String email,
             @Field("username") String username
     );

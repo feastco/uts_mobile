@@ -101,7 +101,7 @@
             android:hint="Email"
             app:boxStrokeColor="@color/secondary"
             app:boxStrokeWidth="2dp"
-            app:endIconMode="clear_text"
+            app:endIconMode="none"
             app:startIconDrawable="@drawable/email"
             app:layout_constraintTop_toBottomOf="@id/tfNama"
             app:layout_constraintStart_toStartOf="parent"

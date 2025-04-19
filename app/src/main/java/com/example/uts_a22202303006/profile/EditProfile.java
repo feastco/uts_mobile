@@ -17,6 +17,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import es.dmoral.toasty.Toasty;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.Nullable;
@@ -93,6 +94,11 @@ public class EditProfile extends AppCompatActivity {
         etProfile_Telp = findViewById(R.id.etProfile_Telp);
         etProfile_Kodepos = findViewById(R.id.etProfile_Kodepos);
         btnSubmit = findViewById(R.id.btnSubmit);
+
+        // Make email field non-editable
+        etProfile_Email.setEnabled(false);
+        etProfile_Email.setFocusable(false);
+        etProfile_Email.setTextColor(getResources().getColor(R.color.text_secondary));
 
         // Set data ke EditText
 //        Glide.with(this)
@@ -174,14 +180,20 @@ public class EditProfile extends AppCompatActivity {
 
         RegisterAPI api = retrofit.create(RegisterAPI.class);
         api.updateProfile(data.getNama(), data.getAlamat(), data.getKota(), data.getProvinsi(),
-                        data.getTelp(), data.getKodepos(), data.getEmail(), data.getUsername())
+                        data.getTelp(), data.getKodepos(),foto, data.getEmail(),  data.getUsername())
                 .enqueue(new Callback<ResponseBody>() {
                     @Override
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                         try {
                             if (response.body() != null) {
                                 JSONObject json = new JSONObject(response.body().string());
-                                Toast.makeText(EditProfile.this, json.getString("message"), Toast.LENGTH_SHORT).show();
+                                String message = json.getString("message");
+                                String result = json.getString("result");
+                                if ("1".equals(result)) {
+                                    Toasty.success(EditProfile.this, message, Toast.LENGTH_SHORT, true).show();
+                                } else {
+                                    Toasty.error(EditProfile.this, message, Toast.LENGTH_SHORT, true).show();
+                                }
 
                                 if (json.getString("result").equals("1")) {
                                     // Update SharedPreferences with new values
@@ -313,7 +325,7 @@ public class EditProfile extends AppCompatActivity {
         try {
             File file = new File(getRealPathFromURI(imageUri));
             if (file == null || !file.exists()) {
-                Toast.makeText(this, "File tidak ditemukan", Toast.LENGTH_SHORT).show();
+                Toasty.error(this, "File tidak ditemukan", Toast.LENGTH_SHORT, true).show();
                 return;
             }
 
@@ -349,7 +361,7 @@ public class EditProfile extends AppCompatActivity {
 
                             runOnUiThread(() -> {
                                 try {
-                                    Toast.makeText(EditProfile.this, json.getString("message"), Toast.LENGTH_SHORT).show();
+                                    Toasty.success(EditProfile.this, json.getString("message"), Toast.LENGTH_SHORT, true).show();
                                 } catch (JSONException e) {
                                     throw new RuntimeException(e);
                                 }
@@ -370,12 +382,12 @@ public class EditProfile extends AppCompatActivity {
                             String errorBody = response.errorBody() != null ? response.errorBody().string() : "No error body";
                             Log.e("Upload", "Server error: " + response.code() + " - " + errorBody);
                             runOnUiThread(() ->
-                                    Toast.makeText(EditProfile.this, "Upload error: " + response.code(), Toast.LENGTH_SHORT).show());
+                                    Toasty.error(EditProfile.this, "Upload error: " + response.code(), Toast.LENGTH_SHORT, true).show());
                         }
                     } catch (Exception e) {
                         Log.e("Upload", "Response parsing error", e);
                         runOnUiThread(() ->
-                                Toast.makeText(EditProfile.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                                Toasty.error(EditProfile.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT, true).show());
                     }
                 }
 
@@ -383,12 +395,12 @@ public class EditProfile extends AppCompatActivity {
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
                     Log.e("Upload", "Upload failed", t);
                     runOnUiThread(() ->
-                            Toast.makeText(EditProfile.this, "Upload failed: " + t.getMessage(), Toast.LENGTH_SHORT).show());
+                            Toasty.error(EditProfile.this, "Upload failed: " + t.getMessage(), Toast.LENGTH_SHORT, true).show());
                 }
             });
         } catch (Exception e) {
             Log.e("Upload", "Upload preparation failed", e);
-            Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            Toasty.error(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT, true).show();
         }
     }
 

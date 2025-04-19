@@ -88,15 +88,40 @@
             android:textSize="14sp"
             android:layout_marginTop="8dp" />
 
-        <TextView
-            android:id="@+id/textViewStokDetail"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="14sp"
-            android:text="Stok: 10"
-            android:textColor="@color/text_secondary"
-            android:textStyle="bold"
-            android:layout_marginTop="8dp" />
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp">
+
+            <TextView
+                android:id="@+id/textViewStokDetail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:text="Stok: 10"
+                android:textColor="@color/text_secondary"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textViewAvailability"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:text="Tersedia"
+                android:textColor="@color/primary"
+                android:textStyle="bold"
+                android:layout_marginStart="12dp" />
+
+            <TextView
+                android:id="@+id/textViewCategory"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:text="Kategori"
+                android:textColor="@color/text_secondary"
+                android:layout_marginStart="12dp" />
+        </LinearLayout>
 
         <ImageButton
             android:id="@+id/imageButtonCart"
