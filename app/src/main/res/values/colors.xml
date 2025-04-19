@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ==================== -->
+    <!--  PALET UTAMA - Logo  -->
+    <!-- ==================== -->
+    <color name="primary">#8B5D7A</color>           <!-- Dusty Rose (Pink gelap natural) -->
+    <color name="primary_variant">#6A3D5C</color>   <!-- Wine Berry -->
+    <color name="on_primary">#FFFFFF</color>        <!-- Putih kontras tinggi -->
+
+    <color name="secondary">#C895B5</color>         <!-- Pink muted (Rose Quartz) -->
+    <color name="secondary_variant">#B07D9F</color> <!-- Mauve Taupe -->
+    <color name="on_secondary">#3E2723</color>      <!-- Coklat gelap natural -->
+
+    <!-- ======================== -->
+    <!--  BACKGROUND & SURFACE   -->
+    <!-- ======================== -->
+    <color name="background">#FFF5F5</color>        <!-- Rose White -->
+    <color name="surface">#F5E1ED</color>           <!-- Blush Pink -->
+    <color name="on_surface">#4A2A3A</color>       <!-- Dark Plum -->
+
+    <!-- ====================== -->
+    <!--  TYPOGRAPHY & TEXTURE  -->
+    <!-- ====================== -->
+    <color name="text_primary">#4A2A3A</color>      <!-- Dark Plum -->
+    <color name="text_secondary">#9E4F6E</color>    <!-- Raspberry Glace -->
+    <color name="text_hint">#C895B5</color>         <!-- Match secondary -->
+
+    <color name="divider">#E0C8D4</color>           <!-- Pale Lilac -->
+    <color name="card_background">#FFFFFF</color>   <!-- Putih bersih -->
+
+    <!-- ================== -->
+    <!--  KOMPONEN UTAMA    -->
+    <!-- ================== -->
+    <!-- Button System -->
+    <color name="button_background">#8B5D7A</color>
+    <color name="button_text">#FFFFFF</color>
+
+    <!-- Link & Interaction -->
+    <color name="link">#9E4F6E</color>             <!-- Raspberry Glace -->
+    <color name="link_pressed">#6A3D5C</color>
+
+    <!-- Status & System Bars -->
+    <color name="status_bar">#6A3D5C</color>
+    <color name="navigation_bar">#6A3D5C</color>
+    <color name="toolbar_background">#6A3D5C</color>
+    <color name="toolbar_title">#FFFFFF</color>
+    <color name="toolbar_icon">#FFFFFF</color>
+
+    <!-- ====================== -->
+    <!--  FEEDBACK & STATES    -->
+    <!-- ====================== -->
+    <!-- Tetap menggunakan warna standar untuk feedback -->
+    <color name="error">#D32F2F</color>
+    <color name="on_error">#FFFFFF</color>
+
+    <!-- Success -->
+    <color name="success_background">#E8F5E9</color>
+    <color name="success_text">#388E3C</color>
+
+    <!-- Warning -->
+    <color name="warning_background">#FFF3E0</color>
+    <color name="warning_text">#FFA000</color>
+
+    <!-- Disabled State -->
+    <color name="disabled_background">#F0E6EC</color>
+    <color name="disabled_text">#C895B5</color>
+
+    <!-- ====================== -->
+    <!--  ELEMEN SPESIAL       -->
+    <!-- ====================== -->
+    <color name="highlight">#E0C8D4</color>         <!-- Pale Lilac -->
+    <color name="accent">#C895B5</color>            <!-- Match secondary -->
+    <color name="fab_background">#8B5D7A</color>    <!-- Warna primary -->
+    <color name="fab_icon">#FFFFFF</color>
+
+    <!-- ====================== -->
+    <!--  WARNA PENDUKUNG      -->
+    <!-- ====================== -->
+    <color name="surface_variant">#E0C8D4</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+
+    <!-- Tetap mempertahankan semua warna asli resource -->
+    <color name="primary_light">#A17F9E</color>     <!-- Beige gray -->
+    <color name="primary_dark">#3E2335</color>
+    <color name="shadow">#1A000000</color>
+    <color name="switch_thumb">#FFFFFF</color>
+    <color name="switch_track">#D7CCC8</color>
+</resources>

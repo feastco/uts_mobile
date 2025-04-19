@@ -1,0 +1,41 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.UTS_A22.2023.03006" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Primary colors -->
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryVariant">@color/primary_variant</item>
+        <item name="colorOnPrimary">@color/on_primary</item>
+
+        <!-- Secondary colors -->
+        <item name="colorSecondary">@color/secondary</item>
+        <item name="colorSecondaryVariant">@color/secondary_variant</item>
+        <item name="colorOnSecondary">@color/on_secondary</item>
+
+        <!-- Background and surface -->
+        <item name="android:colorBackground">@color/background</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@color/on_surface</item>
+
+        <!-- Error -->
+        <item name="colorError">@color/error</item>
+        <item name="colorOnError">@color/on_error</item>
+
+        <!-- Text colors -->
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+        <item name="android:textColorHint">@color/text_hint</item>
+        <item name="actionMenuTextColor">@color/on_primary</item>
+
+        <!-- Status bar color -->
+        <item name="android:statusBarColor">@color/primary_variant</item>
+
+        <!-- Navigation bar (if needed) -->
+        <item name="android:navigationBarColor">@color/white</item>
+
+        <!-- Control highlights -->
+        <item name="colorControlHighlight">@color/primary_light</item>
+    </style>
+
+    <!-- Apply theme to your app -->
+    <style name="Theme.UTS_A22.2023.03006" parent="Base.Theme.UTS_A22.2023.03006" />
+</resources>

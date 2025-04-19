@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">Elisha Mart</string>
+    <string name="title_Home">Home</string>
+    <string name="title_Cart">Cart</string>
+    <string name="title_Profile">Profile</string>
+
+    <style name="MenuCardStyle">
+        <item name="android:layout_marginBottom">8dp</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="cardElevation">0dp</item>
+        <item name="cardBackgroundColor">@color/surface</item>
+    </style>
+
+    <style name="SocialButtonStyle">
+        <item name="android:layout_width">48dp</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:background">?selectableItemBackgroundBorderless</item>
+        <item name="android:padding">12dp</item>
+    </style>
+</resources>
