@@ -33,6 +33,7 @@ import com.example.uts_a22202303006.MainActivity;
 import com.example.uts_a22202303006.R;
 import com.example.uts_a22202303006.api.RegisterAPI;
 import com.example.uts_a22202303006.api.ServerAPI;
+import com.example.uts_a22202303006.databinding.ActivityEditProfileBinding;
 import com.example.uts_a22202303006.ui.profile.ProfileFragment;
 
 import org.json.JSONException;
@@ -66,17 +67,21 @@ public class EditProfile extends AppCompatActivity {
     TextView btnChangePhoto;
     EditText etProfile_Nama, etProfile_Email, etProfile_Alamat, etProfile_Kota, etProfile_Provinsi, etProfile_Telp, etProfile_Kodepos;
     Button btnSubmit;
+    private ActivityEditProfileBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_edit_profile);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+//        EdgeToEdge.enable(this);
+//        setContentView(R.layout.activity_edit_profile);
+//        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+//            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+//            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+//            return insets;
+//        });
+
+        binding = ActivityEditProfileBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
         nama = getIntent().getStringExtra("nama");
         username = getIntent().getStringExtra("username");
@@ -114,15 +119,15 @@ public class EditProfile extends AppCompatActivity {
 
         btnSubmit.setOnClickListener(v -> updateProfil());
 
-        ivBack.setOnClickListener(v -> navigateToHome());
+        binding.ivBack.setOnClickListener(v -> finish());
 
     }
 
-    private void navigateToHome() {
-        Intent intent = new Intent(EditProfile.this, ProfileFragment.class);
-        startActivity(intent);
-        finish();
-    }
+//    private void navigateToHome() {
+//        Intent intent = new Intent(EditProfile.this, ProfileFragment.class);
+//        startActivity(intent);
+//        finish();
+//    }
 
     private void getProfil(String vusername) {
         ServerAPI urlAPI = new ServerAPI();

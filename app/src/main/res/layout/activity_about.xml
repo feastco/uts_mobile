@@ -51,18 +51,16 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="16dp" />
 
-    <TextView
-        android:id="@+id/txtTentangDetails"
+    <ImageView
+        android:id="@+id/imgTentangKami"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="200dp"
         android:layout_marginHorizontal="10dp"
-        android:text="Elisha Mart adalah toko kosmetik dan perlengkapan salon yang berlokasi di Jl. Prof. Dr. Hamka Raya KM 2, Tambakaji, Kecamatan Ngaliyan, Kota Semarang, Jawa Tengah. Didirikan pada tahun 2019 oleh pasangan Bapak Candra dan Ibu Eli, Elisha Mart telah menjadi pusat perbelanjaan produk perawatan tubuh dan rambut yang menawarkan berbagai produk dan layanan kepada pelanggannya."
-        android:textColor="@color/text_secondary"
-        android:textSize="16sp"
+        android:scaleType="centerCrop"
         app:layout_constraintTop_toBottomOf="@id/txtTentangKami"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="8dp" />
+        android:layout_marginTop="16dp" />
 
     <!-- Store Address Section -->
     <TextView
@@ -74,7 +72,7 @@
         android:textColor="@color/text_primary"
         android:textSize="18sp"
         android:textStyle="bold"
-        app:layout_constraintTop_toBottomOf="@id/txtTentangDetails"
+        app:layout_constraintTop_toBottomOf="@id/imgTentangKami"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="16dp" />

@@ -3,6 +3,7 @@ package com.example.uts_a22202303006.profile;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import com.bumptech.glide.Glide;
 import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,6 +21,10 @@ public class About extends AppCompatActivity {
         // Inflate layout using ViewBinding
         binding = ActivityAboutBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        Glide.with(this)
+                .load("https://lh3.googleusercontent.com/gps-cs-s/AB5caB_wBCeZ11AdoutIN2rerj_ed5hawI7I4p2zW9tJRZzjfvSWzm5PHeEdTW8CH8vxrTlrZxZH4Z8dPiqTfUJx6sUYlos78wHeXDs55XvvVxJIwGiFDJI80ljXRKyHxR98YTwa-9xUNA=s680-w680-h510")
+                .into(binding.imgTentangKami);
 
         // Set click listener for ivBack
         binding.ivBack.setOnClickListener(v -> finish());

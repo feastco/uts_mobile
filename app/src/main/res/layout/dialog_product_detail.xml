@@ -61,7 +61,7 @@
                 android:textSize="16sp"
                 android:text="Rp. 100.000"
                 android:textStyle="bold"
-                android:textColor="@color/primary"
+                android:textColor="@color/black"
                 android:layout_marginTop="4dp" />
 
             <TextView
@@ -123,25 +123,35 @@
                 android:layout_marginStart="12dp" />
         </LinearLayout>
 
-        <ImageButton
-            android:id="@+id/imageButtonCart"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="horizontal"
             android:layout_marginTop="12dp"
-            android:background="@android:color/transparent"
-            android:padding="8dp"
-            android:scaleType="centerInside"
-            android:src="@drawable/cart"
-            tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
+            android:gravity="center">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/buttonClose"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Tutup"
-            android:textColor="@color/white"
-            android:backgroundTint="@android:color/holo_red_dark"
-            android:layout_marginTop="12dp"
-            app:cornerRadius="8dp"/>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonClose"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Tutup"
+                android:textColor="@color/white"
+                android:backgroundTint="@android:color/holo_red_dark"
+                app:cornerRadius="8dp"
+                android:layout_marginEnd="8dp"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonCart"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Cart"
+                android:textColor="@color/white"
+                android:backgroundTint="@color/primary"
+                app:cornerRadius="8dp" />
+
+
+        </LinearLayout>
     </LinearLayout>
 </androidx.cardview.widget.CardView>

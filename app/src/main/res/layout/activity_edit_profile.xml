@@ -5,6 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     tools:context=".profile.EditProfile">
 
     <Toolbar
@@ -231,7 +232,7 @@
             android:layout_height="60dp"
             android:layout_marginTop="150dp"
             android:backgroundTint="@color/primary"
-            android:text="Submit"
+            android:text="Save Changes"
             android:textColor="@color/white"
             android:textSize="20sp"
             app:icon="@drawable/baseline_login_24"

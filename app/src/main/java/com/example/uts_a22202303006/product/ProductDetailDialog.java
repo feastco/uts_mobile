@@ -78,7 +78,7 @@ public class ProductDetailDialog extends BottomSheetDialogFragment {
         TextView textViewStok = view.findViewById(R.id.textViewStokDetail);
         TextView textViewAvailability = view.findViewById(R.id.textViewAvailability);
         TextView textViewCategory = view.findViewById(R.id.textViewCategory);
-        ImageButton imageButtonCart = view.findViewById(R.id.imageButtonCart);
+        Button ButtonCart = view.findViewById(R.id.buttonCart);
         Button buttonClose = view.findViewById(R.id.buttonClose);
 
         // Set product data
@@ -90,13 +90,13 @@ public class ProductDetailDialog extends BottomSheetDialogFragment {
         // Handle stock status
         if (product.getStok() <= 0) {
             imageViewStatus.setVisibility(View.VISIBLE);
-            imageButtonCart.setEnabled(false); // Disable cart button when out of stock
-            imageButtonCart.setAlpha(0.5f); // Make cart button semi-transparent
+            ButtonCart.setEnabled(false); // Disable cart button when out of stock
+            ButtonCart.setAlpha(0.5f); // Make cart button semi-transparent
             imageView.setAlpha(0.5f); // Make image view semi-transparent
         } else {
             imageViewStatus.setVisibility(View.GONE);
-            imageButtonCart.setEnabled(true);
-            imageButtonCart.setAlpha(1f);
+            ButtonCart.setEnabled(true);
+            ButtonCart.setAlpha(1f);
         }
         // Set availability text and color based on stock
         if (product.getStok() > 0) {
@@ -140,7 +140,7 @@ public class ProductDetailDialog extends BottomSheetDialogFragment {
             textViewHargaDiskon.setVisibility(View.GONE);
         }
 
-        imageButtonCart.setOnClickListener(v -> {
+        ButtonCart.setOnClickListener(v -> {
             if (product.getStok() == 0) {
                 Toasty.error(requireContext(), "Produk habis, tidak dapat ditambahkan ke keranjang", Toast.LENGTH_SHORT, true).show();
                 return;
