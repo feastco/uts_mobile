@@ -10,6 +10,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import es.dmoral.toasty.Toasty;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -17,6 +19,8 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 import android.content.SharedPreferences;
+
+import com.example.uts_a22202303006.api.RegisterAPI;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
@@ -31,6 +35,15 @@ import com.example.uts_a22202303006.product.ProductDetailDialog;
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
+
+import android.util.Log;
+import android.widget.Toast;
+import es.dmoral.toasty.Toasty;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import okhttp3.ResponseBody;
+import com.example.uts_a22202303006.api.ServerAPI;
 
 public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductViewHolder> {
 
@@ -110,17 +123,26 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
                 .error(R.drawable.ic_launcher_foreground)
                 .into(holder.imageViewProduct);
 
-        // Setup product card click listener
+        // Display initial visit count (might be 0 if not yet fetched)
+        holder.textViewVisitCount.setText("Visited: " + product.getVisitCount());
+
+        // Handle click on product
+        // Handle click on product
         holder.productLayout.setOnClickListener(v -> {
-            ProductDetailDialog dialog = new ProductDetailDialog(product);
-            dialog.show(fragment.getChildFragmentManager(), "ProductDetailDialog");
+            // Update visit count in database and show dialog AFTER count is updated
+            updateVisitCount(product.getKode(), position, holder.textViewVisitCount);
+            // Dialog creation is now handled in updateVisitCount after successful API call
         });
 
-        // Setup button click listeners
+// Handle detail button click
         holder.btnDetail.setOnClickListener(v -> {
-            ProductDetailDialog dialog = new ProductDetailDialog(product);
-            dialog.show(fragment.getChildFragmentManager(), "ProductDetailDialog");
+            // Update visit count in database and show dialog AFTER count is updated
+            updateVisitCount(product.getKode(), position, holder.textViewVisitCount);
+            // Dialog creation is now handled in updateVisitCount after successful API call
         });
+
+
+
 
         holder.btnAddToCart.setOnClickListener(v -> {
             if (product.getStok() <= 0) {
@@ -157,8 +179,6 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
 
             // Add new product to cart if it doesn't exist
             if (!alreadyExists) {
-                // Create a deep copy of the product using Gson serialization/deserialization
-//                Gson gson = new Gson();
                 Product cartProduct = gson.fromJson(gson.toJson(product), Product.class);
                 cartProduct.setQty(1); // Set initial quantity to 1
                 listcart.add(cartProduct);
@@ -179,6 +199,82 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         });
     }
 
+    private void updateVisitCount(String productCode, int position, TextView textViewVisitCount) {
+        RegisterAPI apiService = ServerAPI.getClient().create(RegisterAPI.class);
+        Call<ResponseBody> call = apiService.updateVisitCount(productCode);
+
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    try {
+                        String responseData = response.body().string();
+                        org.json.JSONObject jsonObject = new org.json.JSONObject(responseData);
+
+                        if (jsonObject.has("status") && jsonObject.getString("status").equals("success")) {
+                            // Get updated visit count
+                            int visitCount = jsonObject.optInt("visit_count", 0);
+                            Log.d("ProductAdapter", "Visit count updated to: " + visitCount);
+
+                            // Update the product in the list
+                            if (position < productList.size()) {
+                                Product product = productList.get(position);
+                                product.setVisitCount(visitCount);
+
+                                // Update UI on the main thread
+                                fragment.requireActivity().runOnUiThread(() -> {
+                                    // Update visit count in list item
+                                    textViewVisitCount.setText("Visited: " + visitCount);
+
+                                    // Visual feedback for update
+                                    textViewVisitCount.setTextColor(ContextCompat.getColor(
+                                            fragment.requireContext(), R.color.primary));
+
+                                    // Create and show dialog AFTER updating the visit count
+                                    ProductDetailDialog dialog = new ProductDetailDialog(product);
+                                    dialog.show(fragment.getChildFragmentManager(), "ProductDetailDialog");
+                                });
+                            }
+                        } else {
+                            Log.e("ProductAdapter", "Error in response: " +
+                                    jsonObject.optString("message", "Unknown error"));
+
+                            // Show dialog anyway if update fails
+                            showProductDetailDialog(productList.get(position));
+                        }
+                    } catch (Exception e) {
+                        Log.e("ProductAdapter", "Error parsing response: " + e.getMessage());
+
+                        // Show dialog anyway if parsing fails
+                        showProductDetailDialog(productList.get(position));
+                    }
+                } else {
+                    Log.e("ProductAdapter", "Failed response: " +
+                            (response.errorBody() != null ? response.errorBody().toString() : "unknown"));
+
+                    // Show dialog anyway if request fails
+                    showProductDetailDialog(productList.get(position));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.e("ProductAdapter", "Network error: " + t.getMessage());
+
+                // Show dialog anyway if network error
+                showProductDetailDialog(productList.get(position));
+            }
+        });
+    }
+
+    // Helper method to show dialog regardless of API success/failure
+    private void showProductDetailDialog(Product product) {
+        fragment.requireActivity().runOnUiThread(() -> {
+            ProductDetailDialog dialog = new ProductDetailDialog(product);
+            dialog.show(fragment.getChildFragmentManager(), "ProductDetailDialog");
+        });
+    }
+
     @Override
     public int getItemCount() {
         return productList.size();
@@ -186,8 +282,9 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
 
     // ViewHolder untuk menyimpan referensi elemen UI
     public static class ProductViewHolder extends RecyclerView.ViewHolder {
+
         ImageView imageViewProduct, imageViewStatus;
-        TextView textViewMerk, textViewHargaJual, textViewHargaJualDiskon, textViewAvailability;
+        TextView textViewMerk, textViewHargaJual, textViewHargaJualDiskon, textViewAvailability, textViewVisitCount;
         ImageButton btnAddToCart, btnDetail;
         ConstraintLayout productLayout;
 
@@ -199,13 +296,14 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
             textViewHargaJual = itemView.findViewById(R.id.textViewHargaJual);
             textViewHargaJualDiskon = itemView.findViewById(R.id.textViewHargaJualDiskon);
             textViewAvailability = itemView.findViewById(R.id.textViewAvailability);
+            textViewVisitCount = itemView.findViewById(R.id.textViewVisitCount);
             btnAddToCart = itemView.findViewById(R.id.btnAddToCart);
             btnDetail = itemView.findViewById(R.id.btnDetail);
             productLayout = itemView.findViewById(R.id.product);
         }
     }
 
-    // HomeViewModel
+    // Update product list and notify adapter
     public void setProductList(List<Product> newProductList) {
         this.productList = newProductList;
         notifyDataSetChanged();

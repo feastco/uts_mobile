@@ -15,32 +15,36 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.uts_a22202303006.R;
 import com.example.uts_a22202303006.adapter.ProductAdapter;
-import com.example.uts_a22202303006.ui.home.HomeViewModel;
+import com.example.uts_a22202303006.ui.product.ProductViewModel;
 
 import java.util.ArrayList;
 
 public class HairCareFragment extends Fragment {
 
-    private RecyclerView recyclerView;
-    private TextView textViewEmpty;
-    private ProductAdapter productAdapter;
-    private HomeViewModel homeViewModel;
+    private RecyclerView recyclerView; // RecyclerView untuk daftar produk
+    private TextView textViewEmpty; // TextView untuk pesan data kosong
+    private ProductAdapter productAdapter; // Adapter untuk produk
+    private ProductViewModel productViewModel; // ViewModel untuk data produk
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.product_fragment, container, false);
 
+        // Inisialisasi RecyclerView dan TextView
         recyclerView = view.findViewById(R.id.recyclerView);
         textViewEmpty = view.findViewById(R.id.textViewEmpty);
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
 
+        // Inisialisasi adapter produk
         productAdapter = new ProductAdapter(this, new ArrayList<>());
         recyclerView.setAdapter(productAdapter);
 
-        homeViewModel = new ViewModelProvider(requireActivity()).get(HomeViewModel.class);
+        // Inisialisasi ViewModel
+        productViewModel = new ViewModelProvider(requireActivity()).get(ProductViewModel.class);
 
-        homeViewModel.getHairCareProducts().observe(getViewLifecycleOwner(), products -> {
+        // Observasi data produk Hair Care
+        productViewModel.getHairCareProducts().observe(getViewLifecycleOwner(), products -> {
             if (products == null || products.isEmpty()) {
                 recyclerView.setVisibility(View.GONE);
                 textViewEmpty.setVisibility(View.VISIBLE);
@@ -51,22 +55,15 @@ public class HairCareFragment extends Fragment {
             }
         });
 
-//        homeViewModel.fetchHairCareProducts(""); // Fetch all products initially
-        // Observe search query changes
-        homeViewModel.getSearchQuery().observe(getViewLifecycleOwner(), query -> {
+        // Observasi query pencarian
+        productViewModel.getSearchQuery().observe(getViewLifecycleOwner(), query -> {
             if (query != null) {
-                homeViewModel.fetchHairCareProducts(query); // Fetch products based on query
+                productViewModel.fetchHairCareProducts(query); // Ambil data berdasarkan query
             }
         });
 
-//        homeViewModel.fetchHairCareProducts("");
-//        homeViewModel.getSearchQuery().observe(getViewLifecycleOwner(), query -> {
-//            if (query != null) {
-//                homeViewModel.fetchHairCareProducts(query);
-//            }
-//        });
-
-        homeViewModel.getErrorMessage().observe(getViewLifecycleOwner(), error -> {
+        // Observasi pesan error
+        productViewModel.getErrorMessage().observe(getViewLifecycleOwner(), error -> {
             if (error != null) {
                 textViewEmpty.setText("Gagal memuat data produk");
                 textViewEmpty.setVisibility(View.VISIBLE);

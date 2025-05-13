@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Konfigurasi destinasi utama
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_home, R.id.navigation_cart, R.id.navigation_profile)
+                R.id.navigation_product, R.id.navigation_cart, R.id.navigation_profile)
                 .build();
 
         // Setup NavController

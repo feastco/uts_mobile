@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Elisha Mart</string>
-    <string name="title_Home">Home</string>
-    <string name="title_Cart">Cart</string>
+    <string name="title_Product">Product</string>
+    <string name="title_Cart">Keranjang</string>
     <string name="title_Profile">Profile</string>
 
     <style name="MenuCardStyle">

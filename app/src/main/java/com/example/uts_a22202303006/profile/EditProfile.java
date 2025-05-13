@@ -233,6 +233,7 @@ public class EditProfile extends AppCompatActivity {
                 });
     }
 
+    //Fungsi untuk mendapatkan string valid dari JSON
     private String getValidString(JSONObject json, String key) {
         try {
             if (json.has(key) && !json.isNull(key)) {
@@ -244,193 +245,193 @@ public class EditProfile extends AppCompatActivity {
         return "";
     }
 
-    private void showImagePickerDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Pilih Gambar");
-        builder.setItems(new CharSequence[]{"Galeri", "Kamera"}, (dialog, which) -> {
-            switch (which) {
-                case 0:
-                    openGallery();
-                    break;
-                case 1:
-                    openCamera();
-                    break;
-            }
-        });
-        builder.show();
-    }
-
-    private void openGallery() {
-        Intent intent = new Intent();
-        intent.setType("image/*");
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
-    }
-
-    private void openCamera() {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            File photoFile = null;
-            try {
-                photoFile = createImageFile();
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-
-            if (photoFile != null) {
-                Uri photoURI = FileProvider.getUriForFile(this,
-                        "com.example.uts_a22202302996.fileprovider",
-                        photoFile);
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                startActivityForResult(takePictureIntent, CAMERA_REQUEST);
-            }
-        }
-    }
-
-    private File createImageFile() throws IOException {
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        File image = File.createTempFile(
-                imageFileName,
-                ".jpg",
-                storageDir
-        );
-
-        currentPhotoPath = image.getAbsolutePath();
-        return image;
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (resultCode == RESULT_OK) {
-            if (requestCode == PICK_IMAGE_REQUEST && data != null && data.getData() != null) {
-                Uri selectedImageUri = data.getData();
-                try {
-                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), selectedImageUri);
-                    imgProfile.setImageBitmap(bitmap);
-                    uploadImage(selectedImageUri);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            } else if (requestCode == CAMERA_REQUEST) {
-                File imgFile = new File(currentPhotoPath);
-                if (imgFile.exists()) {
-                    Bitmap bitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-                    imgProfile.setImageBitmap(bitmap);
-                    uploadImage(Uri.fromFile(imgFile));
-                }
-            }
-        }
-    }
-
-    private void uploadImage(Uri imageUri) {
-        try {
-            File file = new File(getRealPathFromURI(imageUri));
-            if (file == null || !file.exists()) {
-                Toasty.error(this, "File tidak ditemukan", Toast.LENGTH_SHORT, true).show();
-                return;
-            }
-
-            Log.d("Upload", "Attempting to upload: " + file.getAbsolutePath());
-
-            // Compress image before upload
-            Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
-            File compressedFile = compressImage(bitmap, file.getName());
-
-            RequestBody requestFile = RequestBody.create(MediaType.parse("image/*"), compressedFile);
-            MultipartBody.Part body = MultipartBody.Part.createFormData("image", compressedFile.getName(), requestFile);
-            RequestBody usernameBody = RequestBody.create(MediaType.parse("text/plain"), username);
-
-            ServerAPI urlAPI = new ServerAPI();
-            Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl(urlAPI.BASE_URL)
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build();
-
-            RegisterAPI api = retrofit.create(RegisterAPI.class);
-            Call<ResponseBody> call = api.uploadImage(body, usernameBody);
-
-            call.enqueue(new Callback<ResponseBody>() {
-                @Override
-                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                    try {
-                        if (response.isSuccessful() && response.body() != null) {
-                            String responseString = response.body().string();
-                            Log.d("Upload", "Server response: " + responseString);
-
-                            JSONObject json = new JSONObject(responseString);
-                            String result = json.getString("result");
-
-                            runOnUiThread(() -> {
-                                try {
-                                    Toasty.success(EditProfile.this, json.getString("message"), Toast.LENGTH_SHORT, true).show();
-                                } catch (JSONException e) {
-                                    throw new RuntimeException(e);
-                                }
-
-                                if ("1".equals(result)) {
-                                    String newPhotoUrl = null;
-                                    try {
-                                        newPhotoUrl = json.getString("url");
-                                    } catch (JSONException e) {
-                                        throw new RuntimeException(e);
-                                    }
-                                    Glide.with(EditProfile.this)
-                                            .load(newPhotoUrl)
-                                            .into(imgProfile);
-                                }
-                            });
-                        } else {
-                            String errorBody = response.errorBody() != null ? response.errorBody().string() : "No error body";
-                            Log.e("Upload", "Server error: " + response.code() + " - " + errorBody);
-                            runOnUiThread(() ->
-                                    Toasty.error(EditProfile.this, "Upload error: " + response.code(), Toast.LENGTH_SHORT, true).show());
-                        }
-                    } catch (Exception e) {
-                        Log.e("Upload", "Response parsing error", e);
-                        runOnUiThread(() ->
-                                Toasty.error(EditProfile.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT, true).show());
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<ResponseBody> call, Throwable t) {
-                    Log.e("Upload", "Upload failed", t);
-                    runOnUiThread(() ->
-                            Toasty.error(EditProfile.this, "Upload failed: " + t.getMessage(), Toast.LENGTH_SHORT, true).show());
-                }
-            });
-        } catch (Exception e) {
-            Log.e("Upload", "Upload preparation failed", e);
-            Toasty.error(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT, true).show();
-        }
-    }
-
-    private File compressImage(Bitmap bitmap, String filename) throws IOException {
-        File outputDir = getCacheDir();
-        File outputFile = File.createTempFile("compressed_", ".jpg", outputDir);
-
-        try (FileOutputStream out = new FileOutputStream(outputFile)) {
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 80, out); // 80% quality
-        }
-
-        Log.d("Upload", "Original size: " + (bitmap.getByteCount()/1024) + "KB");
-        Log.d("Upload", "Compressed size: " + (outputFile.length()/1024) + "KB");
-
-        return outputFile;
-    }
-
-    private String getRealPathFromURI(Uri contentUri) {
-        String[] proj = {MediaStore.Images.Media.DATA};
-        Cursor cursor = getContentResolver().query(contentUri, proj, null, null, null);
-        if (cursor == null) return null;
-        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-        cursor.moveToFirst();
-        String path = cursor.getString(column_index);
-        cursor.close();
-        return path;
-    }
+//    private void showImagePickerDialog() {
+//        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+//        builder.setTitle("Pilih Gambar");
+//        builder.setItems(new CharSequence[]{"Galeri", "Kamera"}, (dialog, which) -> {
+//            switch (which) {
+//                case 0:
+//                    openGallery();
+//                    break;
+//                case 1:
+//                    openCamera();
+//                    break;
+//            }
+//        });
+//        builder.show();
+//    }
+//
+//    private void openGallery() {
+//        Intent intent = new Intent();
+//        intent.setType("image/*");
+//        intent.setAction(Intent.ACTION_GET_CONTENT);
+//        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
+//    }
+//
+//    private void openCamera() {
+//        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+//        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+//            File photoFile = null;
+//            try {
+//                photoFile = createImageFile();
+//            } catch (IOException ex) {
+//                ex.printStackTrace();
+//            }
+//
+//            if (photoFile != null) {
+//                Uri photoURI = FileProvider.getUriForFile(this,
+//                        "com.example.uts_a22202302996.fileprovider",
+//                        photoFile);
+//                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+//                startActivityForResult(takePictureIntent, CAMERA_REQUEST);
+//            }
+//        }
+//    }
+//
+//    private File createImageFile() throws IOException {
+//        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+//        String imageFileName = "JPEG_" + timeStamp + "_";
+//        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+//        File image = File.createTempFile(
+//                imageFileName,
+//                ".jpg",
+//                storageDir
+//        );
+//
+//        currentPhotoPath = image.getAbsolutePath();
+//        return image;
+//    }
+//
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+//
+//        if (resultCode == RESULT_OK) {
+//            if (requestCode == PICK_IMAGE_REQUEST && data != null && data.getData() != null) {
+//                Uri selectedImageUri = data.getData();
+//                try {
+//                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), selectedImageUri);
+//                    imgProfile.setImageBitmap(bitmap);
+//                    uploadImage(selectedImageUri);
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            } else if (requestCode == CAMERA_REQUEST) {
+//                File imgFile = new File(currentPhotoPath);
+//                if (imgFile.exists()) {
+//                    Bitmap bitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+//                    imgProfile.setImageBitmap(bitmap);
+//                    uploadImage(Uri.fromFile(imgFile));
+//                }
+//            }
+//        }
+//    }
+//
+//    private void uploadImage(Uri imageUri) {
+//        try {
+//            File file = new File(getRealPathFromURI(imageUri));
+//            if (file == null || !file.exists()) {
+//                Toasty.error(this, "File tidak ditemukan", Toast.LENGTH_SHORT, true).show();
+//                return;
+//            }
+//
+//            Log.d("Upload", "Attempting to upload: " + file.getAbsolutePath());
+//
+//            // Compress image before upload
+//            Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
+//            File compressedFile = compressImage(bitmap, file.getName());
+//
+//            RequestBody requestFile = RequestBody.create(MediaType.parse("image/*"), compressedFile);
+//            MultipartBody.Part body = MultipartBody.Part.createFormData("image", compressedFile.getName(), requestFile);
+//            RequestBody usernameBody = RequestBody.create(MediaType.parse("text/plain"), username);
+//
+//            ServerAPI urlAPI = new ServerAPI();
+//            Retrofit retrofit = new Retrofit.Builder()
+//                    .baseUrl(urlAPI.BASE_URL)
+//                    .addConverterFactory(GsonConverterFactory.create())
+//                    .build();
+//
+//            RegisterAPI api = retrofit.create(RegisterAPI.class);
+//            Call<ResponseBody> call = api.uploadImage(body, usernameBody);
+//
+//            call.enqueue(new Callback<ResponseBody>() {
+//                @Override
+//                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+//                    try {
+//                        if (response.isSuccessful() && response.body() != null) {
+//                            String responseString = response.body().string();
+//                            Log.d("Upload", "Server response: " + responseString);
+//
+//                            JSONObject json = new JSONObject(responseString);
+//                            String result = json.getString("result");
+//
+//                            runOnUiThread(() -> {
+//                                try {
+//                                    Toasty.success(EditProfile.this, json.getString("message"), Toast.LENGTH_SHORT, true).show();
+//                                } catch (JSONException e) {
+//                                    throw new RuntimeException(e);
+//                                }
+//
+//                                if ("1".equals(result)) {
+//                                    String newPhotoUrl = null;
+//                                    try {
+//                                        newPhotoUrl = json.getString("url");
+//                                    } catch (JSONException e) {
+//                                        throw new RuntimeException(e);
+//                                    }
+//                                    Glide.with(EditProfile.this)
+//                                            .load(newPhotoUrl)
+//                                            .into(imgProfile);
+//                                }
+//                            });
+//                        } else {
+//                            String errorBody = response.errorBody() != null ? response.errorBody().string() : "No error body";
+//                            Log.e("Upload", "Server error: " + response.code() + " - " + errorBody);
+//                            runOnUiThread(() ->
+//                                    Toasty.error(EditProfile.this, "Upload error: " + response.code(), Toast.LENGTH_SHORT, true).show());
+//                        }
+//                    } catch (Exception e) {
+//                        Log.e("Upload", "Response parsing error", e);
+//                        runOnUiThread(() ->
+//                                Toasty.error(EditProfile.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT, true).show());
+//                    }
+//                }
+//
+//                @Override
+//                public void onFailure(Call<ResponseBody> call, Throwable t) {
+//                    Log.e("Upload", "Upload failed", t);
+//                    runOnUiThread(() ->
+//                            Toasty.error(EditProfile.this, "Upload failed: " + t.getMessage(), Toast.LENGTH_SHORT, true).show());
+//                }
+//            });
+//        } catch (Exception e) {
+//            Log.e("Upload", "Upload preparation failed", e);
+//            Toasty.error(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT, true).show();
+//        }
+//    }
+//
+//    private File compressImage(Bitmap bitmap, String filename) throws IOException {
+//        File outputDir = getCacheDir();
+//        File outputFile = File.createTempFile("compressed_", ".jpg", outputDir);
+//
+//        try (FileOutputStream out = new FileOutputStream(outputFile)) {
+//            bitmap.compress(Bitmap.CompressFormat.JPEG, 80, out); // 80% quality
+//        }
+//
+//        Log.d("Upload", "Original size: " + (bitmap.getByteCount()/1024) + "KB");
+//        Log.d("Upload", "Compressed size: " + (outputFile.length()/1024) + "KB");
+//
+//        return outputFile;
+//    }
+//
+//    private String getRealPathFromURI(Uri contentUri) {
+//        String[] proj = {MediaStore.Images.Media.DATA};
+//        Cursor cursor = getContentResolver().query(contentUri, proj, null, null, null);
+//        if (cursor == null) return null;
+//        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+//        cursor.moveToFirst();
+//        String path = cursor.getString(column_index);
+//        cursor.close();
+//        return path;
+//    }
 }

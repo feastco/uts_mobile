@@ -4,9 +4,9 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/navigation_home"
+        android:id="@+id/navigation_product"
         android:icon="@drawable/ic_home_black_24dp"
-        android:title="@string/title_Home" />
+        android:title="@string/title_Product" />
 
     <item
         android:id="@+id/navigation_cart"

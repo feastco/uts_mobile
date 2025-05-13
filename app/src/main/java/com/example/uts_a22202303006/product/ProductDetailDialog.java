@@ -32,13 +32,13 @@ import java.util.Locale;
 
 public class ProductDetailDialog extends BottomSheetDialogFragment {
 
-    private ArrayList<Product> listcart;
-    private SharedPreferences sharedPreferences;
-    private Product product;
-
+    private ArrayList<Product> listcart; // Daftar produk dalam keranjang
+    private SharedPreferences sharedPreferences; // SharedPreferences untuk menyimpan data keranjang
+    private Product product; // Produk yang akan ditampilkan
     public ProductDetailDialog(Product product) {
-        this.product = product;
+        this.product = product; // Inisialisasi produk
     }
+    private boolean shouldFetchVisitCount = true;
 
     private String formatRupiah(String harga) {
         try {
@@ -54,11 +54,14 @@ public class ProductDetailDialog extends BottomSheetDialogFragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        // Inflate layout untuk dialog
         View view = inflater.inflate(R.layout.dialog_product_detail, container, false);
 
+        // Inisialisasi SharedPreferences
         sharedPreferences = requireActivity().getSharedPreferences("product", MODE_PRIVATE);
         listcart = new ArrayList<>();
 
+        // Ambil data keranjang dari SharedPreferences
         if (sharedPreferences.contains("listproduct")) {
             Gson gson = new Gson();
             String jsonText = sharedPreferences.getString("listproduct", null);
@@ -67,6 +70,7 @@ public class ProductDetailDialog extends BottomSheetDialogFragment {
                 listcart.add(cart);
             }
         }
+
 
         // Initialize views
         ImageView imageView = view.findViewById(R.id.imageViewDetail);
@@ -80,6 +84,9 @@ public class ProductDetailDialog extends BottomSheetDialogFragment {
         TextView textViewCategory = view.findViewById(R.id.textViewCategory);
         Button ButtonCart = view.findViewById(R.id.buttonCart);
         Button buttonClose = view.findViewById(R.id.buttonClose);
+        TextView textViewVisitCountDetail = view.findViewById(R.id.textViewVisitCountDetail);
+
+        textViewVisitCountDetail.setText("Visited: " + product.getVisitCount());
 
         // Set product data
         Glide.with(requireContext()).load(product.getFoto()).into(imageView);
@@ -140,6 +147,7 @@ public class ProductDetailDialog extends BottomSheetDialogFragment {
             textViewHargaDiskon.setVisibility(View.GONE);
         }
 
+        // Tambahkan produk ke keranjang saat tombol diklik
         ButtonCart.setOnClickListener(v -> {
             if (product.getStok() == 0) {
                 Toasty.error(requireContext(), "Produk habis, tidak dapat ditambahkan ke keranjang", Toast.LENGTH_SHORT, true).show();

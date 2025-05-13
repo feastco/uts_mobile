@@ -1,4 +1,4 @@
-package com.example.uts_a22202303006.ui.home;
+package com.example.uts_a22202303006.ui.product;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -8,6 +8,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import com.denzcoskun.imageslider.ImageSlider;
+import com.denzcoskun.imageslider.models.SlideModel;
+import com.denzcoskun.imageslider.constants.ScaleTypes;
+import java.util.ArrayList;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,23 +21,30 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.uts_a22202303006.R;
 import com.example.uts_a22202303006.adapter.ViewPagerAdapter;
-import com.example.uts_a22202303006.databinding.FragmentHomeBinding;
+import com.example.uts_a22202303006.databinding.FragmentProductBinding;
 import com.example.uts_a22202303006.product.AllProductsFragment;
 import com.example.uts_a22202303006.product.BodyCareFragment;
 import com.example.uts_a22202303006.product.HairCareFragment;
 
-public class HomeFragment extends Fragment {
+public class ProductFragment extends Fragment {
 
-    private FragmentHomeBinding binding;
-    private HomeViewModel homeViewModel;
+    private FragmentProductBinding binding;
+    private ProductViewModel homeViewModel;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        binding = FragmentHomeBinding.inflate(inflater, container, false);
+        binding = FragmentProductBinding.inflate(inflater, container, false);
+
+
+        ImageSlider imageSlider = binding.imageSlider;
+        ArrayList<SlideModel> slideModel = new ArrayList<>();
+        slideModel.add(new SlideModel(R.drawable.imageslider1, ScaleTypes.FIT));
+        slideModel.add(new SlideModel(R.drawable.imageslider2, ScaleTypes.FIT));
+        imageSlider.setImageList(slideModel);
 
         // Initialize ViewModel first to ensure data is available
-        homeViewModel = new ViewModelProvider(requireActivity()).get(HomeViewModel.class);
+        homeViewModel = new ViewModelProvider(requireActivity()).get(ProductViewModel.class);
 
         // Initialize data loading for all categories
         homeViewModel.fetchAllProducts("");
@@ -48,15 +59,32 @@ public class HomeFragment extends Fragment {
         // This prevents the SearchView from automatically taking focus
         binding.getRoot().requestFocus();
 
+        binding.getRoot().post(() -> {
+            binding.getRoot().requestFocus();
+            SearchView searchView = binding.toolbar.findViewById(R.id.searchView);
+            if (searchView != null) {
+                searchView.clearFocus();
+                searchView.setIconified(true);
+            }
+        });
+
         return binding.getRoot();
     }
 
     private void setupSearch() {
         SearchView searchView = binding.toolbar.findViewById(R.id.searchView);
 
-        // Prevent auto-focus on the SearchView
-        searchView.setFocusable(false);
+        // Prevent SearchView from auto-expanding
         searchView.setIconified(true);
+        searchView.clearFocus();
+
+        // Important: Prevent SearchView from taking focus automatically
+        searchView.setFocusable(false);
+        searchView.setFocusableInTouchMode(true);
+
+        // Additional step to ensure root layout gets focus instead
+        binding.getRoot().setFocusableInTouchMode(true);
+        binding.getRoot().requestFocus();
 
         // Configure SearchView to properly handle focus
         searchView.setOnQueryTextFocusChangeListener((v, hasFocus) -> {
@@ -78,7 +106,7 @@ public class HomeFragment extends Fragment {
         // Handle search interactions
         searchView.setOnSearchClickListener(v -> {
             // When search icon is clicked
-            searchView.setIconified(false);
+            // No need to call setIconified(false) here as it happens automatically
         });
 
         searchView.setOnCloseListener(() -> {

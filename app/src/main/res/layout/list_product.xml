@@ -92,7 +92,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/textViewHargaJual" />
 
-        <!-- Availability Status and Action Buttons in same row -->
+        <!-- Availability Status and Action Buttons -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -101,20 +101,9 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
-            <!-- Availability Status -->
-            <TextView
-                android:id="@+id/textViewAvailability"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Tersedia"
-                android:textColor="@color/primary"
-                android:textSize="12sp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent" />
-
             <!-- Action Buttons -->
             <LinearLayout
+                android:id="@+id/buttonLayout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
@@ -142,6 +131,29 @@
                     android:padding="4dp"
                     app:tint="@color/primary" />
             </LinearLayout>
+
+            <!-- Status Row -->
+            <TextView
+                android:id="@+id/textViewAvailability"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Tersedia"
+                android:textColor="@color/primary"
+                android:textSize="12sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/buttonLayout" />
+
+            <TextView
+                android:id="@+id/textViewVisitCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Visited: 0"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/textViewAvailability"
+                app:layout_constraintBottom_toBottomOf="@id/textViewAvailability" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

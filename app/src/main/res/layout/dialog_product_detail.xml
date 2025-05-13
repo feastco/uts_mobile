@@ -121,7 +121,15 @@
                 android:text="Kategori"
                 android:textColor="@color/text_secondary"
                 android:layout_marginStart="12dp" />
+
         </LinearLayout>
+        <TextView
+            android:id="@+id/textViewVisitCountDetail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Visited: 0"
+            android:textColor="@color/text_secondary"
+            android:textSize="14sp" />
 
         <LinearLayout
             android:layout_width="match_parent"

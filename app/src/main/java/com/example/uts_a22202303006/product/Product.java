@@ -2,50 +2,51 @@ package com.example.uts_a22202303006.product;
 
 import com.google.gson.annotations.SerializedName;
 
+// Model untuk merepresentasikan data produk
 public class Product {
-    private int qty = 1;
+    private int qty = 1; // Jumlah produk dalam keranjang
 
-    public int getQty() {
-        return qty;
-    }
+    // Getter dan setter untuk jumlah produk
+    public int getQty() { return qty; }
+    public void setQty(int qty) { this.qty = qty; }
 
-    public void setQty(int qty) {
-        this.qty = qty;
-    }
-
-    @SerializedName("kode")
+    @SerializedName("kode") // Kode produk
     private String kode;
 
-    @SerializedName("merk")
+    @SerializedName("merk") // Merk produk
     private String merk;
 
-    @SerializedName("kategori")
+    @SerializedName("kategori") // Kategori produk
     private String kategori;
 
-    @SerializedName("hargabeli")
+    @SerializedName("hargabeli") // Harga beli produk
     private Double hargaBeli;
 
-    @SerializedName("hargajual")
+    @SerializedName("hargajual") // Harga jual produk
     private Double hargaJual;
 
-    @SerializedName("stok")
+    @SerializedName("stok") // Stok produk
     private Integer stok;
 
-    @SerializedName("foto")
+    @SerializedName("foto") // URL foto produk
     private String foto;
 
-    @SerializedName("deskripsi")
+    @SerializedName("deskripsi") // Deskripsi produk
     private String deskripsi;
 
-    @SerializedName("diskonjual")
+    @SerializedName("diskonjual") // Diskon pada harga jual
     private Integer diskonJual;
 
-    @SerializedName("diskonbeli")
+    @SerializedName("diskonbeli") // Diskon pada harga beli
     private Integer diskonBeli;
 
-    @SerializedName("hargapokok")
+    @SerializedName("hargapokok") // Harga pokok produk
     private Double hargaPokok;
 
+    @SerializedName("visit") // Match the field name from your database
+    private Integer visit;
+
+    // Getter untuk properti produk
     public String getKode() { return kode; }
     public String getMerk() { return merk; }
     public String getKategori() { return kategori; }
@@ -57,4 +58,14 @@ public class Product {
     public int getDiskonJual() { return diskonJual != null ? diskonJual : 0; }
     public int getDiskonBeli() { return diskonBeli != null ? diskonBeli : 0; }
     public Double getHargapokok() { return hargaPokok != null ? hargaPokok : 0; }
+
+    // Getter method
+    public int getVisitCount() {
+        return visit != null ? visit : 0;
+    }
+
+    // Setter method
+    public void setVisitCount(int visitCount) {
+        this.visit = visitCount;
+    }
 }

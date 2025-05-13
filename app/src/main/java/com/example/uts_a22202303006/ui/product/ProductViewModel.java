@@ -1,4 +1,4 @@
-package com.example.uts_a22202303006.ui.home;
+package com.example.uts_a22202303006.ui.product;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -15,14 +15,18 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class HomeViewModel extends ViewModel {
+// Kelas ViewModel untuk mengelola data UI secara terpisah dari lifecycle Activity/Fragment
+public class ProductViewModel extends ViewModel {
 
+
+    // MutableLiveData untuk menyimpan daftar produk
     private final MutableLiveData<List<Product>> products = new MutableLiveData<>();
     private final MutableLiveData<String> searchQuery = new MutableLiveData<>();
     private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
     private final MutableLiveData<List<Product>> bodyCareProducts = new MutableLiveData<>();
     private final MutableLiveData<List<Product>> hairCareProducts = new MutableLiveData<>();
 
+    // Getter untuk mendapatkan daftar produk sebagai LiveData
     public LiveData<List<Product>> getProducts() {
         return products;
     }
@@ -49,6 +53,7 @@ public class HomeViewModel extends ViewModel {
         searchQuery.setValue(query);
     }
 
+    // Fungsi untuk mengambil semua produk berdasarkan query pencarian
     public void fetchAllProducts(String search) {
         fetchProducts("all", search, products);
         if (products.getValue() != null && search.equals(searchQuery.getValue())) {

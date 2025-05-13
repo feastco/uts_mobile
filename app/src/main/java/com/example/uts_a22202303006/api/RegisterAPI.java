@@ -54,10 +54,14 @@ public interface RegisterAPI {
     Call<ProductResponse> getProducts(@Query("kategori") String kategori,
                                       @Query("search") String search);
 
-    @Multipart
-    @POST("upload_image.php")
-    Call<ResponseBody> uploadImage(
-            @Part MultipartBody.Part image,
-            @Part("username") RequestBody username
-    );
+    @GET("update_visit.php")  // Change from POST to GET
+    Call<ResponseBody> updateVisitCount(@Query("kode") String kode);  // Use Query instead of Field
+
+
+//    @Multipart
+//    @POST("upload_image.php")
+//    Call<ResponseBody> uploadImage(
+//            @Part MultipartBody.Part image,
+//            @Part("username") RequestBody username
+//    );
 }

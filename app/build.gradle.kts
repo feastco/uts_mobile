@@ -45,23 +45,31 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+
+    //retrofit
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
+    //lottie
     implementation("com.github.LottieFiles:dotlottie-android:0.5.0")
     implementation("com.airbnb.android:lottie:6.6.0")
 
+    //glide
     implementation("com.github.bumptech.glide:glide:4.16.0")
     annotationProcessor ("com.github.bumptech.glide:compiler:4.12.0")
 
     implementation("com.google.code.gson:gson:2.10.1")
-    implementation("com.google.android.material:material:1.9.0")
 
+    //refresh layout
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 
     // Toast Library
     implementation("com.github.GrenderG:Toasty:1.5.2")
 
+    //material design
     implementation("com.google.android.material:material:1.9.0")
+
+    //image slider
+    implementation("com.github.denzcoskun:ImageSlideshow:0.1.2")
 
 }
