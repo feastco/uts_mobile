@@ -9,118 +9,21 @@
     android:fitsSystemWindows="true">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/LayoutProduct"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
         android:isScrollContainer="true"
         tools:context=".ui.product.ProductFragment">
 
-        <!-- Header Container with Brand Info -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/headerContainer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="4dp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
-
-            <!-- Your existing header content -->
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="16dp">
-
-                <!-- Logo Circle -->
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/logoContainer"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    app:cardCornerRadius="30dp"
-                    app:cardElevation="0dp"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent">
-
-                    <ImageView
-                        android:id="@+id/logoImage"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:scaleType="centerCrop"
-                        android:src="@raw/logo"
-                        android:contentDescription="Logo" />
-                </androidx.cardview.widget.CardView>
-
-                <!-- Brand and Welcome Text -->
-                <TextView
-                    android:id="@+id/brandText"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:text="Elisha Mart"
-                    android:textColor="@color/primary"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    app:layout_constraintStart_toEndOf="@id/logoContainer"
-                    app:layout_constraintTop_toTopOf="@id/logoContainer"
-                    app:layout_constraintEnd_toEndOf="parent"/>
-
-                <TextView
-                    android:id="@+id/welcomeText"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:text="Selamat Datang, User"
-                    android:textColor="@color/text_primary"
-                    android:textSize="14sp"
-                    app:layout_constraintStart_toEndOf="@id/logoContainer"
-                    app:layout_constraintTop_toBottomOf="@id/brandText"
-                    app:layout_constraintEnd_toEndOf="parent"/>
-                <TextView
-                    android:id="@+id/txtEmail"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:text="Email user"
-                    android:textColor="@color/text_primary"
-                    android:textSize="14sp"
-                    app:layout_constraintStart_toEndOf="@id/logoContainer"
-                    app:layout_constraintTop_toBottomOf="@id/welcomeText"
-                    app:layout_constraintEnd_toEndOf="parent"/>
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </androidx.cardview.widget.CardView>
-
-        <androidx.cardview.widget.CardView
-            android:id="@+id/sliderContainer"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:layout_margin="16dp"
-            app:cardElevation="20dp"
-            app:cardCornerRadius="12dp"
-            app:layout_constraintTop_toBottomOf="@id/headerContainer"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
-
-            <com.denzcoskun.imageslider.ImageSlider
-                android:id="@+id/imageSlider"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:iss_period="1000"
-                app:iss_delay="1000"
-                app:iss_auto_cycle="true" />
-
-        </androidx.cardview.widget.CardView>
-
-        <!-- Search Toolbar -->
+        <!-- Search Toolbar - Fixed constraint -->
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/primary"
             android:minHeight="?attr/actionBarSize"
-            app:layout_constraintTop_toBottomOf="@id/sliderContainer"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
@@ -133,16 +36,28 @@
                 app:cardCornerRadius="20dp"
                 app:cardElevation="2dp">
 
-                <androidx.appcompat.widget.SearchView
-                    android:id="@+id/searchView"
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/search_bar"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="@android:color/transparent"
-                    app:iconifiedByDefault="false"
-                    app:queryBackground="@android:color/transparent"
-                    app:queryHint="Cari produk..." />
-            </androidx.cardview.widget.CardView>
+                    android:clickable="true"
+                    android:focusable="true"
+                    tools:ignore="TouchTargetSizeCheck">
 
+                    <androidx.appcompat.widget.SearchView
+                        android:id="@+id/searchView"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@android:color/transparent"
+                        app:iconifiedByDefault="true"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:queryBackground="@android:color/transparent"
+                        app:queryHint="Cari produk..."
+                        app:searchHintIcon="@null" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.cardview.widget.CardView>
         </androidx.appcompat.widget.Toolbar>
 
         <!-- Tab Layout -->
@@ -159,7 +74,7 @@
             app:tabTextColor="@android:color/darker_gray"
             tools:ignore="SpeakableTextPresentCheck" />
 
-        <!-- Content ViewPager - Fixed height to prevent scroll conflicts -->
+        <!-- Content ViewPager -->
         <androidx.viewpager.widget.ViewPager
             android:id="@+id/viewPager"
             android:layout_width="0dp"

@@ -8,6 +8,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+
 import com.denzcoskun.imageslider.ImageSlider;
 import com.denzcoskun.imageslider.models.SlideModel;
 import com.denzcoskun.imageslider.constants.ScaleTypes;
@@ -36,87 +39,91 @@ public class ProductFragment extends Fragment {
                              @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = FragmentProductBinding.inflate(inflater, container, false);
 
+        // Setup image slider and other UI components first
+//        ImageSlider imageSlider = binding.imageSlider;
+//        ArrayList<SlideModel> slideModel = new ArrayList<>();
+//        slideModel.add(new SlideModel(R.drawable.imageslider1, ScaleTypes.FIT));
+//        slideModel.add(new SlideModel(R.drawable.imageslider2, ScaleTypes.FIT));
+//        imageSlider.setImageList(slideModel);
 
-        ImageSlider imageSlider = binding.imageSlider;
-        ArrayList<SlideModel> slideModel = new ArrayList<>();
-        slideModel.add(new SlideModel(R.drawable.imageslider1, ScaleTypes.FIT));
-        slideModel.add(new SlideModel(R.drawable.imageslider2, ScaleTypes.FIT));
-        imageSlider.setImageList(slideModel);
-
-        // Initialize ViewModel first to ensure data is available
+        // Initialize ViewModel
         homeViewModel = new ViewModelProvider(requireActivity()).get(ProductViewModel.class);
-
-        // Initialize data loading for all categories
         homeViewModel.fetchAllProducts("");
         homeViewModel.fetchBodyCareProducts("");
         homeViewModel.fetchHairCareProducts("");
 
         // Setup UI components
-        setupHeader();
+//        setupHeader();
         setupViewPager();
         setupSearch();
 
-        // This prevents the SearchView from automatically taking focus
+        // Check if we have arguments to set the tab
+        if (getArguments() != null) {
+            int selectedTab = getArguments().getInt("selected_tab", 0);
+            binding.viewPager.setCurrentItem(selectedTab);
+        }
+
         binding.getRoot().requestFocus();
 
-        binding.getRoot().post(() -> {
-            binding.getRoot().requestFocus();
-            SearchView searchView = binding.toolbar.findViewById(R.id.searchView);
-            if (searchView != null) {
-                searchView.clearFocus();
-                searchView.setIconified(true);
-            }
-        });
+        // Check for arguments first
+        int selectedTab = 0;
+        if (getArguments() != null) {
+            selectedTab = getArguments().getInt("selected_tab", 0);
+        } else {
+            // If no arguments, check SharedPreferences
+            SharedPreferences prefs = requireActivity().getSharedPreferences(
+                    "app_prefs", Context.MODE_PRIVATE);
+            selectedTab = prefs.getInt("selected_product_tab", 0);
+            // Clear the preference after reading it
+            prefs.edit().remove("selected_product_tab").apply();
+        }
+
+        // Set the selected tab
+        int finalSelectedTab = selectedTab;
+        binding.viewPager.post(() -> binding.viewPager.setCurrentItem(finalSelectedTab));
 
         return binding.getRoot();
     }
 
     private void setupSearch() {
         SearchView searchView = binding.toolbar.findViewById(R.id.searchView);
+        View searchBarContainer = binding.toolbar.findViewById(R.id.search_bar);
 
-        // Prevent SearchView from auto-expanding
+        // Configure SearchView
         searchView.setIconified(true);
+        searchView.setIconifiedByDefault(true);
         searchView.clearFocus();
 
-        // Important: Prevent SearchView from taking focus automatically
-        searchView.setFocusable(false);
-        searchView.setFocusableInTouchMode(true);
+        // Root view focus control
+        View rootView = binding.LayoutProduct;
+        rootView.setFocusableInTouchMode(true);
+        rootView.requestFocus();
 
-        // Additional step to ensure root layout gets focus instead
-        binding.getRoot().setFocusableInTouchMode(true);
-        binding.getRoot().requestFocus();
-
-        // Configure SearchView to properly handle focus
-        searchView.setOnQueryTextFocusChangeListener((v, hasFocus) -> {
-            if (hasFocus) {
-                // When search gains focus, adjust window to prevent bottom nav from rising
-                if (requireActivity().getWindow() != null) {
-                    requireActivity().getWindow().setSoftInputMode(
-                            WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
-                }
-            } else {
-                // Reset when focus is lost
-                if (requireActivity().getWindow() != null) {
-                    requireActivity().getWindow().setSoftInputMode(
-                            WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-                }
-            }
+        // Make the entire search bar clickable
+        searchBarContainer.setOnClickListener(v -> {
+            // Expand SearchView when clicking anywhere on the container
+            searchView.setIconified(false);
+            searchView.requestFocus();
+            showKeyboard(searchView);
         });
 
-        // Handle search interactions
-        searchView.setOnSearchClickListener(v -> {
-            // When search icon is clicked
-            // No need to call setIconified(false) here as it happens automatically
-        });
+        // Find the built-in close button
+        int closeButtonId = searchView.getContext().getResources().getIdentifier(
+                "android:id/search_close_btn", null, null);
+        ImageView closeButton = searchView.findViewById(closeButtonId);
 
-        searchView.setOnCloseListener(() -> {
-            // When search is closed, clear query and hide keyboard
-            searchView.setQuery("", false);
-            hideKeyboard();
-            binding.getRoot().requestFocus();
-            return false;
-        });
+        if (closeButton != null) {
+            closeButton.setOnClickListener(v -> {
+                searchView.setQuery("", false);
+                searchView.setIconified(true);
+                searchView.clearFocus();
+                hideKeyboard();
+                homeViewModel.setSearchQuery("");
+                rootView.requestFocus();
+            });
+        }
 
+        // Query listeners remain unchanged
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -127,16 +134,42 @@ public class ProductFragment extends Fragment {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                // Add slight delay to avoid excessive API calls
                 searchView.removeCallbacks(null);
                 searchView.postDelayed(() -> {
                     if (searchView.getQuery().toString().equals(newText)) {
                         homeViewModel.setSearchQuery(newText);
                     }
-                }, 300); // 300ms delay
+                }, 300);
                 return true;
             }
         });
+
+        // Other listeners remain the same
+        searchView.setOnSearchClickListener(v -> {
+            searchView.setFocusable(true);
+            searchView.setFocusableInTouchMode(true);
+            searchView.requestFocus();
+            showKeyboard(searchView);
+        });
+
+        searchView.setOnCloseListener(() -> {
+            searchView.setQuery("", false);
+            hideKeyboard();
+            rootView.requestFocus();
+            return false;
+        });
+    }
+
+    // Improved keyboard showing method
+    private void showKeyboard(View view) {
+        view.postDelayed(() -> {
+            view.requestFocus();
+            InputMethodManager imm = (InputMethodManager) requireContext()
+                    .getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm != null) {
+                imm.showSoftInput(view, InputMethodManager.SHOW_FORCED);
+            }
+        }, 100);
     }
 
     private void hideKeyboard() {
@@ -160,17 +193,18 @@ public class ProductFragment extends Fragment {
         binding.viewPager.setOffscreenPageLimit(2);
     }
 
-    private void setupHeader() {
-        // Load logo
-        binding.logoImage.setImageResource(R.drawable.logo);
+//    private void setupHeader() {
+//        // Load logo
+//        binding.logoImage.setImageResource(R.drawable.logo);
+//
+//        // Set welcome text with user's name
+//        SharedPreferences sharedPreferences = requireActivity().getSharedPreferences("login_session", Context.MODE_PRIVATE);
+//        String nama = sharedPreferences.getString("nama", "Guest");
+//        String email = sharedPreferences.getString("email", "Guest@gmail.com");
+//        binding.welcomeText.setText("Selamat Datang, " + nama);
+//        binding.txtEmail.setText(email);
+//    }
 
-        // Set welcome text with user's name
-        SharedPreferences sharedPreferences = requireActivity().getSharedPreferences("login_session", Context.MODE_PRIVATE);
-        String nama = sharedPreferences.getString("nama", "Guest");
-        String email = sharedPreferences.getString("email", "Guest@gmail.com");
-        binding.welcomeText.setText("Selamat Datang, " + nama);
-        binding.txtEmail.setText(email);
-    }
 
     @Override
     public void onDestroyView() {

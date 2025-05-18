@@ -72,4 +72,7 @@ dependencies {
     //image slider
     implementation("com.github.denzcoskun:ImageSlideshow:0.1.2")
 
+    //location
+    implementation ("com.google.android.gms:play-services-location:21.0.1")
+
 }
