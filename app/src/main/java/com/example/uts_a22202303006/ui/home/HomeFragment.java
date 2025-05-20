@@ -398,7 +398,7 @@ public class HomeFragment extends Fragment {
                     requireActivity().findViewById(R.id.navigation_product).performClick();
 
                     // Show feedback to user
-                    Toasty.info(requireContext(), "Browsing " + category,
+                    Toasty.info(requireContext(), category,
                             Toast.LENGTH_SHORT, true).show();
                 });
 

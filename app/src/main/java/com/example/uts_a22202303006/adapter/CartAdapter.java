@@ -3,6 +3,7 @@ package com.example.uts_a22202303006.adapter;
 import android.content.SharedPreferences;
 import android.graphics.Paint;
 import android.graphics.Typeface;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,12 +16,14 @@ import android.widget.Toast;
 import es.dmoral.toasty.Toasty;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.uts_a22202303006.R;
 import com.example.uts_a22202303006.product.Product;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.gson.Gson;
 
 import java.text.NumberFormat;
@@ -125,26 +128,123 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
             if (pos != RecyclerView.NO_POSITION) {
                 Product removedProduct = listProduct.get(pos);
 
-                // Dialog konfirmasi
-                new android.app.AlertDialog.Builder(v.getContext())
-                        .setTitle("Konfirmasi Hapus")
-                        .setMessage("Apakah kamu yakin ingin menghapus " + removedProduct.getMerk() + " dari keranjang?")
-                        .setPositiveButton("Hapus", (dialog, which) -> {
-                            listProduct.remove(pos);
-                            notifyItemRemoved(pos);
-                            notifyItemRangeChanged(pos, listProduct.size());
+                try {
+                    // Buat dialog kustom dengan Material Design
+//                    MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(v.getContext(),
+//                            com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog_Centered);
 
-                            // Update SharedPreferences
-                            updateSharedPreferences(v, listProduct);
-                            notifyCartTotalChanged();
-                            notifyCartQtyChanged();
+                    MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(v.getContext());
 
-                            Toasty.success(v.getContext(), "Berhasil menghapus: " + removedProduct.getMerk(), Toast.LENGTH_SHORT, true).show();
-                        })
-                        .setNegativeButton("Batal", null)
-                        .show();
+                    try {
+                        // Log before inflating
+                        Log.d("CartAdapter", "Attempting to inflate dialog layout");
+
+                        View dialogView = LayoutInflater.from(v.getContext()).inflate(R.layout.dialog_konfirmasi_hapus, null);
+
+                        // Log after inflating
+                        Log.d("CartAdapter", "Layout inflated successfully");
+
+                        // Check each view
+                        ImageView imgProduct = dialogView.findViewById(R.id.img_product);
+                        Log.d("CartAdapter", "imgProduct: " + (imgProduct != null ? "found" : "null"));
+
+                        // Set komponen dialog dengan null checking
+//                        ImageView imgProduct = dialogView.findViewById(R.id.img_product);
+                        TextView txtTitle = dialogView.findViewById(R.id.txt_title);
+                        TextView txtMessage = dialogView.findViewById(R.id.txt_message);
+                        Button btnCancel = dialogView.findViewById(R.id.btn_cancel);
+                        Button btnDelete = dialogView.findViewById(R.id.btn_delete);
+
+                        // Verifikasi semua view ditemukan
+                        if (imgProduct != null && txtTitle != null && txtMessage != null &&
+                                btnCancel != null && btnDelete != null) {
+
+                            // Set view dan builder
+                            builder.setView(dialogView);
+
+                            // Isi komponen dengan data
+                            if (removedProduct.getFoto() != null) {
+                                Glide.with(v.getContext())
+                                        .load(removedProduct.getFoto())
+                                        .placeholder(R.drawable.ic_launcher_foreground)
+                                        .into(imgProduct);
+                            }
+
+                            txtTitle.setText("Konfirmasi Hapus");
+                            txtMessage.setText("Apakah kamu yakin ingin menghapus " +
+                                    removedProduct.getMerk() + " dari keranjang?");
+
+                            // Buat dan tampilkan dialog
+                            AlertDialog dialog = builder.create();
+
+                            // Set aksi tombol
+                            btnCancel.setOnClickListener(view -> dialog.dismiss());
+
+                            btnDelete.setOnClickListener(view -> {
+                                // Hapus item dengan animasi sederhana
+                                listProduct.remove(pos);
+                                notifyItemRemoved(pos);
+                                notifyItemRangeChanged(pos, listProduct.size());
+
+                                // Update data
+                                updateSharedPreferences(v, listProduct);
+                                notifyCartTotalChanged();
+                                notifyCartQtyChanged();
+
+                                // Notifikasi sukses
+                                Toasty.success(v.getContext(),
+                                        "Berhasil menghapus: " + removedProduct.getMerk(),
+                                        Toast.LENGTH_SHORT, true).show();
+
+                                dialog.dismiss();
+                            });
+
+                            // Tampilkan dialog
+                            dialog.show();
+
+                            // Animasi dialog sederhana
+                            dialogView.setAlpha(0.7f);
+                            dialogView.animate()
+                                    .alpha(1f)
+                                    .setDuration(200);
+
+                            return; // Keluar dari method jika berhasil
+                        }
+                    } catch (Exception e) {
+                        Log.e("CartAdapter", "Error creating dialog", e);
+                        e.printStackTrace();
+                    }
+                } catch (Exception e) {
+                    Log.e("CartAdapter", "Error creating dialog", e);
+                    e.printStackTrace();
+                }
+
+                // Fallback ke dialog standar jika terjadi error
+                fallbackToStandardDialog(v, pos, removedProduct);
             }
         });
+    }
+
+    private void fallbackToStandardDialog(View v, int pos, Product removedProduct) {
+        new AlertDialog.Builder(v.getContext())
+                .setTitle("Konfirmasi Hapus")
+                .setMessage("Apakah kamu yakin ingin menghapus " +
+                        (removedProduct.getMerk() != null ? removedProduct.getMerk() : "produk ini") +
+                        " dari keranjang?")
+                .setPositiveButton("Hapus", (dialog, which) -> {
+                    listProduct.remove(pos);
+                    notifyItemRemoved(pos);
+                    notifyItemRangeChanged(pos, listProduct.size());
+
+                    updateSharedPreferences(v, listProduct);
+                    notifyCartTotalChanged();
+                    notifyCartQtyChanged();
+
+                    Toasty.success(v.getContext(), "Berhasil menghapus: " +
+                            removedProduct.getMerk(), Toast.LENGTH_SHORT, true).show();
+                })
+                .setNegativeButton("Batal", null)
+                .show();
     }
 
     // Simpan data keranjang ke SharedPreferences

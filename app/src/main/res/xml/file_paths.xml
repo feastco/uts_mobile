@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <paths>
-    <external-path name="external_files" path="." />
+    <external-path name="external_files" path="Android/data/com.example.uts_a22202303006/files/Pictures" />
     <external-files-path name="my_images" path="Pictures" />
-    <cache-path name="cache" path="/" />
+    <cache-path name="cache_images" path="." />
 </paths>

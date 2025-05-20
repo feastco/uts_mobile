@@ -58,10 +58,10 @@ public interface RegisterAPI {
     Call<ResponseBody> updateVisitCount(@Query("kode") String kode);  // Use Query instead of Field
 
 
-//    @Multipart
-//    @POST("upload_image.php")
-//    Call<ResponseBody> uploadImage(
-//            @Part MultipartBody.Part image,
-//            @Part("username") RequestBody username
-//    );
+    @Multipart
+    @POST("upload_image.php")
+    Call<ResponseBody> uploadImage(
+            @Part MultipartBody.Part foto,
+            @Part("username") RequestBody username
+    );
 }
