@@ -4,6 +4,7 @@
     <string name="title_Cart">Keranjang</string>
     <string name="title_Profile">Profile</string>
     <string name="tittle_Home">Beranda</string>
+    <string name="signup_text"><![CDATA[Don\'t have an account? <font color="#FF4081">Sign up</font>]]></string>
 
     <style name="MenuCardStyle">
         <item name="android:layout_marginBottom">8dp</item>

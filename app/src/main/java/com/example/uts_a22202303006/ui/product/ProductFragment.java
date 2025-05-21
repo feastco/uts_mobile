@@ -15,6 +15,7 @@ import android.view.animation.RotateAnimation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import io.reactivex.disposables.CompositeDisposable;
 
 import com.denzcoskun.imageslider.ImageSlider;
 import com.denzcoskun.imageslider.models.SlideModel;
@@ -39,6 +40,8 @@ public class ProductFragment extends Fragment {
 
     private FragmentProductBinding binding;
     private ProductViewModel homeViewModel;
+
+    private CompositeDisposable disposables = new CompositeDisposable();
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -76,15 +79,14 @@ public class ProductFragment extends Fragment {
 
         // Setup UI components with delay to show loading
         new Handler().postDelayed(() -> {
-            // Setup UI components in correct order
-            setupViewPager();
-
-            // Set tab selection AFTER setting up ViewPager
-            binding.viewPager.setCurrentItem(finalSelectedTab);
-
-            setupSearch();
-            hideLoading(loadingOverlay);
-        }, 1000); // Short delay for visual appeal
+            // Check if fragment is still attached before proceeding
+            if (isAdded() && !isDetached() && binding != null) {
+                setupViewPager();
+                binding.viewPager.setCurrentItem(finalSelectedTab);
+                setupSearch();
+                hideLoading(loadingOverlay);
+            }
+        }, 1000);
 
         binding.getRoot().requestFocus();
         return binding.getRoot();
@@ -219,6 +221,8 @@ public class ProductFragment extends Fragment {
 
     // Hide loading animation
     private void hideLoading(View overlay) {
+        if (overlay == null || !isAdded() || getContext() == null) return;
+
         Animation fadeOut = AnimationUtils.loadAnimation(getContext(), android.R.anim.fade_out);
         fadeOut.setDuration(400);
         fadeOut.setAnimationListener(new Animation.AnimationListener() {
@@ -227,12 +231,15 @@ public class ProductFragment extends Fragment {
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                overlay.setVisibility(View.GONE);
+                if (overlay != null && isAdded()) {
+                    overlay.setVisibility(View.GONE);
+                }
             }
 
             @Override
             public void onAnimationRepeat(Animation animation) {}
         });
+
         overlay.startAnimation(fadeOut);
     }
 
@@ -251,6 +258,16 @@ public class ProductFragment extends Fragment {
 
     @Override
     public void onDestroyView() {
+        // Cancel any pending Handlers
+        if (binding != null && binding.getRoot() != null) {
+            binding.getRoot().removeCallbacks(null);
+        }
+
+        // Clear disposables
+        if (disposables != null) {
+            disposables.clear();
+        }
+
         super.onDestroyView();
         binding = null;
     }

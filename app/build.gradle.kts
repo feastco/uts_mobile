@@ -78,4 +78,8 @@ dependencies {
     //load animation
     implementation ("com.facebook.shimmer:shimmer:0.5.0")
 
+    //handle
+    implementation ("io.reactivex.rxjava2:rxjava:2.2.21")
+    implementation ("io.reactivex.rxjava2:rxandroid:2.1.1")
+
 }
