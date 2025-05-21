@@ -4,8 +4,8 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ServerAPI {
-    public static final String  BASE_URL = "https://51b1-2001-448a-4008-2631-57e8-5cd0-5465-a8aa.ngrok-free.app/webserver/";
-    public static final String  BASE_URL_IMAGE = "https://51b1-2001-448a-4008-2631-57e8-5cd0-5465-a8aa.ngrok-free.app/webserver/images/";
+    public static final String  BASE_URL = "https://d962-36-80-156-143.ngrok-free.app/webserver/";
+    public static final String  BASE_URL_IMAGE = "https://d962-36-80-156-143.ngrok-free.app/webserver/images/";
 //public static final String BASE_URL="https://qgis.umrmaulana.my.id/webservice/UTS/";
     private static Retrofit retrofit;
 

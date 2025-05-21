@@ -3,10 +3,15 @@ package com.example.uts_a22202303006.ui.product;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.RotateAnimation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -21,6 +26,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.viewpager.widget.ViewPager;
 
 import com.example.uts_a22202303006.R;
 import com.example.uts_a22202303006.adapter.ViewPagerAdapter;
@@ -39,12 +45,12 @@ public class ProductFragment extends Fragment {
                              @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = FragmentProductBinding.inflate(inflater, container, false);
 
-        // Setup image slider and other UI components first
-//        ImageSlider imageSlider = binding.imageSlider;
-//        ArrayList<SlideModel> slideModel = new ArrayList<>();
-//        slideModel.add(new SlideModel(R.drawable.imageslider1, ScaleTypes.FIT));
-//        slideModel.add(new SlideModel(R.drawable.imageslider2, ScaleTypes.FIT));
-//        imageSlider.setImageList(slideModel);
+        // Add a loading overlay
+        View loadingOverlay = inflater.inflate(R.layout.loading_overlay, container, false);
+        binding.LayoutProduct.addView(loadingOverlay);
+
+        // Show initial loading animation
+        showLoading(loadingOverlay);
 
         // Initialize ViewModel
         homeViewModel = new ViewModelProvider(requireActivity()).get(ProductViewModel.class);
@@ -52,20 +58,7 @@ public class ProductFragment extends Fragment {
         homeViewModel.fetchBodyCareProducts("");
         homeViewModel.fetchHairCareProducts("");
 
-        // Setup UI components
-//        setupHeader();
-        setupViewPager();
-        setupSearch();
-
-        // Check if we have arguments to set the tab
-        if (getArguments() != null) {
-            int selectedTab = getArguments().getInt("selected_tab", 0);
-            binding.viewPager.setCurrentItem(selectedTab);
-        }
-
-        binding.getRoot().requestFocus();
-
-        // Check for arguments first
+        // Get the selected tab index ONCE
         int selectedTab = 0;
         if (getArguments() != null) {
             selectedTab = getArguments().getInt("selected_tab", 0);
@@ -78,10 +71,22 @@ public class ProductFragment extends Fragment {
             prefs.edit().remove("selected_product_tab").apply();
         }
 
-        // Set the selected tab
-        int finalSelectedTab = selectedTab;
-        binding.viewPager.post(() -> binding.viewPager.setCurrentItem(finalSelectedTab));
+        // Store final value for use in lambda
+        final int finalSelectedTab = selectedTab;
 
+        // Setup UI components with delay to show loading
+        new Handler().postDelayed(() -> {
+            // Setup UI components in correct order
+            setupViewPager();
+
+            // Set tab selection AFTER setting up ViewPager
+            binding.viewPager.setCurrentItem(finalSelectedTab);
+
+            setupSearch();
+            hideLoading(loadingOverlay);
+        }, 1000); // Short delay for visual appeal
+
+        binding.getRoot().requestFocus();
         return binding.getRoot();
     }
 
@@ -191,6 +196,44 @@ public class ProductFragment extends Fragment {
 
         // Force initial layout refresh
         binding.viewPager.setOffscreenPageLimit(2);
+    }
+
+    // Show loading animation
+    private void showLoading(View overlay) {
+        ImageView loadingIcon = overlay.findViewById(R.id.loadingIcon);
+        loadingIcon.setImageResource(R.drawable.loading_animation);
+
+        // Create rotation animation
+        RotateAnimation rotate = new RotateAnimation(
+                0, 360,
+                Animation.RELATIVE_TO_SELF, 0.5f,
+                Animation.RELATIVE_TO_SELF, 0.5f
+        );
+        rotate.setDuration(1000);
+        rotate.setRepeatCount(Animation.INFINITE);
+        rotate.setInterpolator(new LinearInterpolator());
+
+        loadingIcon.startAnimation(rotate);
+        overlay.setVisibility(View.VISIBLE);
+    }
+
+    // Hide loading animation
+    private void hideLoading(View overlay) {
+        Animation fadeOut = AnimationUtils.loadAnimation(getContext(), android.R.anim.fade_out);
+        fadeOut.setDuration(400);
+        fadeOut.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {}
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                overlay.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {}
+        });
+        overlay.startAnimation(fadeOut);
     }
 
 //    private void setupHeader() {

@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -16,62 +17,67 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.uts_a22202303006.R;
 import com.example.uts_a22202303006.adapter.ProductAdapter;
 import com.example.uts_a22202303006.ui.product.ProductViewModel;
+import com.facebook.shimmer.ShimmerFrameLayout;
 
 import java.util.ArrayList;
 
 public class AllProductsFragment extends Fragment {
 
-    // RecyclerView untuk menampilkan daftar produk
     private RecyclerView recyclerView;
-    // TextView untuk menampilkan pesan jika data kosong
     private TextView textViewEmpty;
-    // Adapter untuk mengelola data produk
     private ProductAdapter productAdapter;
-    // ViewModel untuk mengelola data produk
     private ProductViewModel productViewModel;
+    private ShimmerFrameLayout shimmerLayout;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        // Inflate layout untuk fragment
         View view = inflater.inflate(R.layout.product_fragment, container, false);
 
-        // Inisialisasi RecyclerView dan TextView
+        // Initialize views
         recyclerView = view.findViewById(R.id.recyclerView);
         textViewEmpty = view.findViewById(R.id.textViewEmpty);
+        shimmerLayout = view.findViewById(R.id.shimmerLayout);
+
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
 
-        // Inisialisasi adapter produk
+        // Initialize adapter
         productAdapter = new ProductAdapter(this, new ArrayList<>());
         recyclerView.setAdapter(productAdapter);
 
-        // Inisialisasi ViewModel
+        // Initialize ViewModel
         productViewModel = new ViewModelProvider(requireActivity()).get(ProductViewModel.class);
 
-        // Observasi data produk
+        // Start shimmer initially
+        startShimmer();
+
+        // Observe data products
         productViewModel.getProducts().observe(getViewLifecycleOwner(), products -> {
+            stopShimmer();
+
             if (products == null || products.isEmpty()) {
-                // Tampilkan pesan jika data kosong
                 recyclerView.setVisibility(View.GONE);
                 textViewEmpty.setVisibility(View.VISIBLE);
             } else {
-                // Tampilkan data produk
                 textViewEmpty.setVisibility(View.GONE);
                 recyclerView.setVisibility(View.VISIBLE);
                 productAdapter.setProductList(products);
             }
         });
 
-        // Observasi query pencarian
+        // Observe search query
         productViewModel.getSearchQuery().observe(getViewLifecycleOwner(), query -> {
             if (query != null) {
-                productViewModel.fetchAllProducts(query); // Ambil data berdasarkan query
+                startShimmer();
+                productViewModel.fetchAllProducts(query);
             }
         });
 
-        // Observasi pesan error
+        // Observe error message
         productViewModel.getErrorMessage().observe(getViewLifecycleOwner(), error -> {
+            stopShimmer();
+
             if (error != null) {
                 textViewEmpty.setText("Gagal memuat data produk");
                 textViewEmpty.setVisibility(View.VISIBLE);
@@ -80,5 +86,26 @@ public class AllProductsFragment extends Fragment {
         });
 
         return view;
+    }
+
+    private void startShimmer() {
+        if (shimmerLayout != null) {
+            recyclerView.setVisibility(View.GONE);
+            textViewEmpty.setVisibility(View.GONE);
+            shimmerLayout.setVisibility(View.VISIBLE);
+            shimmerLayout.startShimmer();
+        }
+    }
+
+    private void stopShimmer() {
+        if (shimmerLayout != null) {
+            shimmerLayout.stopShimmer();
+            shimmerLayout.setVisibility(View.GONE);
+
+            // Create fade-in animation for smooth transition
+            AlphaAnimation fadeIn = new AlphaAnimation(0.0f, 1.0f);
+            fadeIn.setDuration(1000);
+            recyclerView.startAnimation(fadeIn);
+        }
     }
 }

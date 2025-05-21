@@ -56,7 +56,7 @@ public class HomeViewModel extends ViewModel {
         return categories;
     }
 
-    public LiveData<Boolean> isLoading() {
+    public LiveData<Boolean> getIsLoading() {
         return isLoading;
     }
 
@@ -159,6 +159,18 @@ public class HomeViewModel extends ViewModel {
                 errorMessage.setValue(error);
             }
         });
+    }
+
+    public void refreshData() {
+        isLoading.setValue(true);
+
+        // Reset error state
+        errorMessage.setValue(null);
+
+        // Call existing load methods
+        loadSliderImages();
+        loadCategories();
+        loadPopularProducts();
     }
 
     private void loadProductsWithSearch(String query) {

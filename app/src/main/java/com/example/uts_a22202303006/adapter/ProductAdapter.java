@@ -5,6 +5,9 @@ import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.RotateAnimation;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -21,6 +24,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.SharedPreferences;
 
 import com.example.uts_a22202303006.api.RegisterAPI;
+import com.example.uts_a22202303006.auth.LoginRequiredManager;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
@@ -145,12 +149,18 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
 
 
         holder.btnAddToCart.setOnClickListener(v -> {
+            // First check if user is logged in properly
+            if (!LoginRequiredManager.isFullyLoggedIn(fragment.getContext())) {
+                LoginRequiredManager.showLoginRequiredDialog(fragment.getContext());
+                return;
+            }
+
             if (product.getStok() <= 0) {
                 Toasty.error(fragment.getContext(), "Produk tidak tersedia", Toast.LENGTH_SHORT, true).show();
                 return;
             }
 
-            // Get current cart from SharedPreferences
+            // Remaining existing cart logic
             SharedPreferences sharedPreferences = fragment.requireActivity()
                     .getSharedPreferences("product", fragment.requireActivity().MODE_PRIVATE);
 
@@ -197,6 +207,25 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
 
             Toasty.success(fragment.getContext(), "Produk ditambahkan ke keranjang", Toast.LENGTH_SHORT, true).show();
         });
+    }
+
+    // Show loading animation
+    private void showLoading(View overlay) {
+        ImageView loadingIcon = overlay.findViewById(R.id.loadingIcon);
+        loadingIcon.setImageResource(R.drawable.loading_animation);
+
+        // Create rotation animation
+        RotateAnimation rotate = new RotateAnimation(
+                0, 360,
+                Animation.RELATIVE_TO_SELF, 0.5f,
+                Animation.RELATIVE_TO_SELF, 0.5f
+        );
+        rotate.setDuration(1000);
+        rotate.setRepeatCount(Animation.INFINITE);
+        rotate.setInterpolator(new LinearInterpolator());
+
+        loadingIcon.startAnimation(rotate);
+        overlay.setVisibility(View.VISIBLE);
     }
 
     private void updateVisitCount(String productCode, int position, TextView textViewVisitCount) {

@@ -77,6 +77,29 @@ public class HomeFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
+        swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout);
+
+        // Configure refresh layout
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            // Call the correctly named method on the correctly named variable
+            viewModel.refreshData();
+        });
+
+        // Observe loading state
+        viewModel.getIsLoading().observe(getViewLifecycleOwner(), isLoading -> {
+            swipeRefreshLayout.setRefreshing(isLoading);
+        });
+
+        // Observe error state
+        viewModel.getErrorMessage().observe(getViewLifecycleOwner(), error -> {
+            // Always stop refreshing on error
+            swipeRefreshLayout.setRefreshing(false);
+
+            if (error != null && !error.isEmpty()) {
+                Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
+            }
+        });
+
         // Initialize views
         imageSlider = view.findViewById(R.id.imageSlider);
         layoutCategories = view.findViewById(R.id.layoutCategories);

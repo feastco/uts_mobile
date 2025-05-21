@@ -9,6 +9,7 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import com.example.uts_a22202303006.auth.LoginRequiredManager;
 import com.example.uts_a22202303006.databinding.ActivityMainBinding;
 import com.example.uts_a22202303006.product.Product;
 import com.google.android.material.badge.BadgeDrawable;
@@ -51,7 +52,22 @@ public class MainActivity extends AppCompatActivity {
 
         // Setup NavController
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
-        NavigationUI.setupWithNavController(binding.navView, navController);
+
+        // Replace the standard setup with custom item selection listener
+        navView.setOnItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+
+            // Check restricted sections (cart and profile)
+            if (itemId == R.id.navigation_cart || itemId == R.id.navigation_profile) {
+                if (!LoginRequiredManager.isFullyLoggedIn(this)) {
+                    LoginRequiredManager.showLoginRequiredDialog(this);
+                    return false; // Prevent navigation
+                }
+            }
+
+            // Navigate using NavController if checks pass
+            return NavigationUI.onNavDestinationSelected(item, navController);
+        });
     }
 
     /**

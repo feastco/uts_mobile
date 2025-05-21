@@ -21,6 +21,7 @@ import androidx.annotation.Nullable;
 import com.bumptech.glide.Glide;
 import com.example.uts_a22202303006.MainActivity;
 import com.example.uts_a22202303006.R;
+import com.example.uts_a22202303006.auth.LoginRequiredManager;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -149,6 +150,13 @@ public class ProductDetailDialog extends BottomSheetDialogFragment {
 
         // Tambahkan produk ke keranjang saat tombol diklik
         ButtonCart.setOnClickListener(v -> {
+            // First check if user is fully logged in
+            if (!LoginRequiredManager.isFullyLoggedIn(requireContext())) {
+                LoginRequiredManager.showLoginRequiredDialog(requireContext());
+                return;
+            }
+
+            // Existing code continues...
             if (product.getStok() == 0) {
                 Toasty.error(requireContext(), "Produk habis, tidak dapat ditambahkan ke keranjang", Toast.LENGTH_SHORT, true).show();
                 return;

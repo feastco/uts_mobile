@@ -74,6 +74,27 @@ public class LoginActivity extends AppCompatActivity {
         etPassword = findViewById(R.id.etPassword);
         btnLogin = findViewById(R.id.btnLogin);
 
+        // Add this code to initialize the guest login button
+        Button btnLoginAsGuest = findViewById(R.id.btnLoginAsGuest);
+
+        // Add guest login functionality
+        btnLoginAsGuest.setOnClickListener(v -> {
+            // Save guest session data
+            SharedPreferences sharedPreferences = getSharedPreferences("login_session", MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean("isLoggedIn", true); // Mark as logged in
+            editor.putString("username", "Guest");
+            editor.putString("role", "guest");
+            editor.putString("foto", "");
+            editor.apply();
+
+            // Navigate to main screen
+            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+        });
+
         // Klik "Belum punya akun?"
         tv_register.setOnClickListener(view -> {
             startActivity(new Intent(LoginActivity.this, RegisterActivity.class));

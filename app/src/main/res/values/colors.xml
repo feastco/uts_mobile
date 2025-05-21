@@ -86,4 +86,6 @@
     <color name="shadow">#1A000000</color>
     <color name="switch_thumb">#FFFFFF</color>
     <color name="switch_track">#D7CCC8</color>
+
+    <color name="shimmer_color">#DDDDDD</color>
 </resources>
