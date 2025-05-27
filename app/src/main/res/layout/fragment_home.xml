@@ -118,6 +118,42 @@
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.cardview.widget.CardView>
 
+            <!-- Search Bar -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/searchBarCard"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="16dp"
+                app:cardCornerRadius="28dp"
+                app:cardElevation="2dp"
+                app:layout_constraintTop_toBottomOf="@id/headerContainer"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="16dp">
+
+                    <ImageView
+                        android:id="@+id/ivSearch"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_search"
+                        app:tint="@color/gray_600" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:text="Cari produk..."
+                        android:textColor="@color/gray_600"
+                        android:textSize="16sp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
             <!-- Image Slider -->
             <com.denzcoskun.imageslider.ImageSlider
                 android:id="@+id/imageSlider"
@@ -128,7 +164,7 @@
                 app:iss_period="3000"
                 app:iss_delay="0"
                 app:iss_corner_radius="5"
-                app:layout_constraintTop_toBottomOf="@id/headerContainer" />
+                app:layout_constraintTop_toBottomOf="@id/searchBarCard" />
 
             <!-- Categories Header -->
             <TextView

@@ -96,9 +96,9 @@ public class HomeViewModel extends ViewModel {
         try {
             // Currently using static categories - could be replaced with API call
             List<CategoryItem> categoryList = new ArrayList<>();
-            categoryList.add(new CategoryItem("All Products", R.drawable.ic_product));
-            categoryList.add(new CategoryItem("Body Care", R.drawable.ic_shopping_bag));
-            categoryList.add(new CategoryItem("Hair Care", R.drawable.ic_price_tag));
+            categoryList.add(new CategoryItem("All Products", R.drawable.toiletries));
+            categoryList.add(new CategoryItem("Body Care", R.drawable.body_soap));
+            categoryList.add(new CategoryItem("Hair Care", R.drawable.shampoo));
             categories.setValue(categoryList);
             isLoading.setValue(false);
         } catch (Exception e) {
@@ -118,9 +118,9 @@ public class HomeViewModel extends ViewModel {
 
     private void initializeCategories() {
         List<CategoryItem> categoryList = new ArrayList<>();
-        categoryList.add(new CategoryItem("All Products", R.drawable.ic_product));
-        categoryList.add(new CategoryItem("Body Care", R.drawable.ic_shopping_bag));
-        categoryList.add(new CategoryItem("Hair Care", R.drawable.ic_price_tag));
+        categoryList.add(new CategoryItem("All Products", R.drawable.toiletries));
+        categoryList.add(new CategoryItem("Body Care", R.drawable.body_soap));
+        categoryList.add(new CategoryItem("Hair Care", R.drawable.shampoo));
         categories.setValue(categoryList);
     }
 

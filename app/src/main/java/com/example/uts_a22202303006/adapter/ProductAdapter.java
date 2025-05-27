@@ -1,5 +1,6 @@
 package com.example.uts_a22202303006.adapter;
 
+import android.content.Intent;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.view.LayoutInflater;
@@ -25,6 +26,7 @@ import android.content.SharedPreferences;
 
 import com.example.uts_a22202303006.api.RegisterAPI;
 import com.example.uts_a22202303006.auth.LoginRequiredManager;
+import com.example.uts_a22202303006.product.ProductDetailActivity;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
@@ -51,7 +53,7 @@ import com.example.uts_a22202303006.api.ServerAPI;
 
 public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductViewHolder> {
 
-    private List<Product> productList;
+    public List<Product> productList;
     private Fragment fragment;
 
     // Constructor
@@ -228,7 +230,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         overlay.setVisibility(View.VISIBLE);
     }
 
-    private void updateVisitCount(String productCode, int position, TextView textViewVisitCount) {
+    public void updateVisitCount(String productCode, int position, TextView textViewVisitCount) {
         RegisterAPI apiService = ServerAPI.getClient().create(RegisterAPI.class);
         Call<ResponseBody> call = apiService.updateVisitCount(productCode);
 
@@ -254,45 +256,45 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
                                 fragment.requireActivity().runOnUiThread(() -> {
                                     // Update visit count in list item
                                     textViewVisitCount.setText("Visited: " + visitCount);
-
-                                    // Visual feedback for update
                                     textViewVisitCount.setTextColor(ContextCompat.getColor(
                                             fragment.requireContext(), R.color.primary));
 
-                                    // Create and show dialog AFTER updating the visit count
-                                    ProductDetailDialog dialog = new ProductDetailDialog(product);
-                                    dialog.show(fragment.getChildFragmentManager(), "ProductDetailDialog");
+                                    // Navigate to ProductDetailActivity with flag to prevent second update
+                                    Intent intent = new Intent(fragment.requireContext(), ProductDetailActivity.class);
+                                    intent.putExtra("PRODUCT_CODE", product.getKode());
+                                    intent.putExtra("FROM_SOURCE", "PRODUCT_FRAGMENT");
+                                    intent.putExtra("COUNT_ALREADY_UPDATED", true); // Add flag to prevent double counting
+                                    fragment.startActivity(intent);
                                 });
                             }
                         } else {
-                            Log.e("ProductAdapter", "Error in response: " +
-                                    jsonObject.optString("message", "Unknown error"));
-
-                            // Show dialog anyway if update fails
-                            showProductDetailDialog(productList.get(position));
+                            navigateToProductDetail(productList.get(position), false);
                         }
                     } catch (Exception e) {
                         Log.e("ProductAdapter", "Error parsing response: " + e.getMessage());
-
-                        // Show dialog anyway if parsing fails
-                        showProductDetailDialog(productList.get(position));
+                        navigateToProductDetail(productList.get(position), false);
                     }
                 } else {
-                    Log.e("ProductAdapter", "Failed response: " +
-                            (response.errorBody() != null ? response.errorBody().toString() : "unknown"));
-
-                    // Show dialog anyway if request fails
-                    showProductDetailDialog(productList.get(position));
+                    navigateToProductDetail(productList.get(position), false);
                 }
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 Log.e("ProductAdapter", "Network error: " + t.getMessage());
-
-                // Show dialog anyway if network error
-                showProductDetailDialog(productList.get(position));
+                navigateToProductDetail(productList.get(position), false);
             }
+        });
+    }
+
+    // Updated helper method to navigate with countUpdated flag
+    private void navigateToProductDetail(Product product, boolean countUpdated) {
+        fragment.requireActivity().runOnUiThread(() -> {
+            Intent intent = new Intent(fragment.requireContext(), ProductDetailActivity.class);
+            intent.putExtra("PRODUCT_CODE", product.getKode());
+            intent.putExtra("FROM_SOURCE", "PRODUCT_FRAGMENT");
+            intent.putExtra("COUNT_ALREADY_UPDATED", countUpdated);
+            fragment.startActivity(intent);
         });
     }
 
@@ -312,10 +314,11 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
     // ViewHolder untuk menyimpan referensi elemen UI
     public static class ProductViewHolder extends RecyclerView.ViewHolder {
 
+        public TextView textViewVisitCount;
         ImageView imageViewProduct, imageViewStatus;
-        TextView textViewMerk, textViewHargaJual, textViewHargaJualDiskon, textViewAvailability, textViewVisitCount;
+        TextView textViewMerk, textViewHargaJual, textViewHargaJualDiskon, textViewAvailability;
         ImageButton btnAddToCart, btnDetail;
-        ConstraintLayout productLayout;
+        public ConstraintLayout productLayout;
 
         public ProductViewHolder(@NonNull View itemView) {
             super(itemView);

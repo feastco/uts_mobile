@@ -38,6 +38,12 @@
         </provider>
 
         <activity
+            android:name=".product.ProductDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".search.SearchActivity"
+            android:exported="false" />
+        <activity
             android:name=".profile.EditProfile"
             android:exported="false" />
         <activity

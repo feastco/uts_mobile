@@ -3,6 +3,7 @@ package com.example.uts_a22202303006.ui.home;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +13,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -23,9 +26,12 @@ import com.denzcoskun.imageslider.ImageSlider;
 import com.denzcoskun.imageslider.interfaces.ItemClickListener;
 import com.example.uts_a22202303006.R;
 import com.example.uts_a22202303006.adapter.ProductAdapter;
+import com.example.uts_a22202303006.api.RegisterAPI;
+import com.example.uts_a22202303006.api.ServerAPI;
 import com.example.uts_a22202303006.product.AllProductsFragment;
 import com.example.uts_a22202303006.product.BodyCareFragment;
 import com.example.uts_a22202303006.product.HairCareFragment;
+import com.example.uts_a22202303006.product.ProductDetailActivity;
 import com.example.uts_a22202303006.ui.product.ProductFragment;
 
 import android.Manifest;
@@ -51,10 +57,18 @@ import java.util.Locale;
 import java.util.ArrayList;
 
 import es.dmoral.toasty.Toasty;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import android.os.Handler;
 import java.util.Calendar;
+import android.content.Intent;
+import com.example.uts_a22202303006.search.SearchActivity;
+import com.example.uts_a22202303006.product.Product;
+
 
 public class HomeFragment extends Fragment {
 
@@ -69,6 +83,15 @@ public class HomeFragment extends Fragment {
     private FusedLocationProviderClient fusedLocationClient;
     private TextView locationTextView;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
+
+//    // Add this launcher declaration
+//    private ActivityResultLauncher<Intent> productDetailLauncher = registerForActivityResult(
+//            new ActivityResultContracts.StartActivityForResult(),
+//            result -> {
+//                // Refresh data when returning from product detail
+//                viewModel.loadPopularProducts();
+//            }
+//    );
 
     @Nullable
     @Override
@@ -113,6 +136,13 @@ public class HomeFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        // Setup search bar click
+        View searchBarCard = view.findViewById(R.id.searchBarCard);
+        searchBarCard.setOnClickListener(v -> {
+            Intent intent = new Intent(requireContext(), SearchActivity.class);
+            startActivity(intent);
+        });
 
         // Call these methods after the view is created
         setupHeader();
@@ -337,14 +367,95 @@ public class HomeFragment extends Fragment {
         // Set up RecyclerView
         recyclerViewPopularProducts.setLayoutManager(new GridLayoutManager(requireContext(), 2));
 
-        // Create adapter with empty list first
-        productAdapter = new ProductAdapter(this, new ArrayList<>());
+        // Create adapter with empty list
+        productAdapter = new ProductAdapter(this, new ArrayList<>()) {
+            @Override
+            public void onBindViewHolder(@NonNull ProductViewHolder holder, int position) {
+                super.onBindViewHolder(holder, position);
+
+                // Override the default click behavior for product layout
+                Product product = productList.get(position);
+                holder.productLayout.setOnClickListener(v -> {
+                    // Use our custom updateVisitCount method just for HomeFragment
+                    updateVisitCountForHome(product, holder.textViewVisitCount);
+                });
+            }
+        };
+
         recyclerViewPopularProducts.setAdapter(productAdapter);
+    }
+
+    // Custom method for HomeFragment to update visit count without double-counting
+    private void updateVisitCountForHome(Product product, TextView textViewVisitCount) {
+        RegisterAPI apiService = ServerAPI.getClient().create(RegisterAPI.class);
+        Call<ResponseBody> call = apiService.updateVisitCount(product.getKode());
+
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    try {
+                        String responseData = response.body().string();
+                        org.json.JSONObject jsonObject = new org.json.JSONObject(responseData);
+
+                        if (jsonObject.has("status") && jsonObject.getString("status").equals("success")) {
+                            // Get updated visit count
+                            int visitCount = jsonObject.optInt("visit_count", 0);
+                            Log.d("HomeFragment", "Visit count updated to: " + visitCount);
+
+                            // Update product locally
+                            product.setVisitCount(visitCount);
+
+                            // Update UI
+                            requireActivity().runOnUiThread(() -> {
+                                textViewVisitCount.setText("Visited: " + visitCount);
+                                textViewVisitCount.setTextColor(ContextCompat.getColor(
+                                        requireContext(), R.color.primary));
+
+                                // Navigate to detail with flag to prevent second update
+                                Intent intent = new Intent(requireContext(), ProductDetailActivity.class);
+                                intent.putExtra("PRODUCT_CODE", product.getKode());
+                                intent.putExtra("FROM_SOURCE", "HOME_FRAGMENT");
+                                intent.putExtra("COUNT_ALREADY_UPDATED", true); // Add this flag
+                                startActivity(intent);
+                            });
+                        } else {
+                            navigateToProductDetail(product);
+                        }
+                    } catch (Exception e) {
+                        Log.e("HomeFragment", "Error parsing response: " + e.getMessage());
+                        navigateToProductDetail(product);
+                    }
+                } else {
+                    navigateToProductDetail(product);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.e("HomeFragment", "Network error: " + t.getMessage());
+                navigateToProductDetail(product);
+            }
+        });
+    }
+
+    // Fallback navigation method
+    private void navigateToProductDetail(Product product) {
+        Intent intent = new Intent(requireContext(), ProductDetailActivity.class);
+        intent.putExtra("PRODUCT_CODE", product.getKode());
+        intent.putExtra("FROM_SOURCE", "HOME_FRAGMENT");
+        startActivity(intent);
     }
 
     @Override
     public void onResume() {
         super.onResume();
+
+        // Check if coming back from product detail
+        if (getActivity() != null && getActivity().getIntent() != null) {
+            // Refresh popular products data to get updated visit counts
+            viewModel.loadPopularProducts();
+        }
 
         // Handle back press in child fragment manager
         requireActivity().getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), new OnBackPressedCallback(true) {
