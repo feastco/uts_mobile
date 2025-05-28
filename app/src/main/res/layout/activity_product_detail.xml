@@ -56,24 +56,40 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <ImageView
-                android:id="@+id/productDetailImage"
+            <RelativeLayout
+                android:id="@+id/productImageContainer"
                 android:layout_width="match_parent"
-                android:layout_height="300dp"
-                android:scaleType="fitCenter"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
+                android:layout_height="320dp"
                 app:layout_constraintTop_toTopOf="parent"
-                tools:src="@tools:sample/backgrounds/scenic" />
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
 
+                <!-- 2. Add bottom padding of 25dp -->
+                <com.denzcoskun.imageslider.ImageSlider
+                    android:id="@+id/productImageSlider"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:paddingBottom="15dp"
+                    app:iss_auto_cycle="true"
+                    app:iss_period="3000"
+                    app:iss_delay="0"
+                    app:iss_corner_radius="20"
+                    app:iss_title_background="@android:color/transparent"
+                    app:iss_selected_dot="@drawable/selected_dot"
+                    app:iss_unselected_dot="@drawable/unselected_dot"
+                    app:iss_error_image="@drawable/error_image"
+                    app:iss_placeholder="@drawable/placeholder_image" />
+            </RelativeLayout>
+
+            <!-- 3. Change top margin from -20dp to -15dp -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="-20dp"
+                android:layout_marginTop="-15dp"
                 app:cardCornerRadius="20dp"
                 app:cardElevation="0dp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/productDetailImage"
+                app:layout_constraintTop_toBottomOf="@id/productImageContainer"
                 app:layout_constraintVertical_bias="0.0">
 
                 <androidx.constraintlayout.widget.ConstraintLayout

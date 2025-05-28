@@ -151,11 +151,6 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
 
 
         holder.btnAddToCart.setOnClickListener(v -> {
-            // First check if user is logged in properly
-            if (!LoginRequiredManager.isFullyLoggedIn(fragment.getContext())) {
-                LoginRequiredManager.showLoginRequiredDialog(fragment.getContext());
-                return;
-            }
 
             if (product.getStok() <= 0) {
                 Toasty.error(fragment.getContext(), "Produk tidak tersedia", Toast.LENGTH_SHORT, true).show();

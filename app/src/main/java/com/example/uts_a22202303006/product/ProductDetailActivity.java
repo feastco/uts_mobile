@@ -1,6 +1,7 @@
 package com.example.uts_a22202303006.product;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
@@ -11,12 +12,21 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.bumptech.glide.Glide;
+import com.denzcoskun.imageslider.ImageSlider;
+import com.denzcoskun.imageslider.constants.ScaleTypes;
+import com.denzcoskun.imageslider.models.SlideModel;
+import com.example.uts_a22202303006.MainActivity;
 import com.example.uts_a22202303006.R;
 import com.example.uts_a22202303006.api.RegisterAPI;
 import com.example.uts_a22202303006.api.ServerAPI;
+import com.example.uts_a22202303006.product.ProductImage;
+import com.example.uts_a22202303006.product.ProductImageResponse;
 import com.example.uts_a22202303006.auth.LoginRequiredManager;
+import com.google.android.material.tabs.TabLayout;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -40,6 +50,8 @@ public class ProductDetailActivity extends AppCompatActivity {
     private Product currentProduct;
     private SharedPreferences sharedPreferences;
     private TextView productDetailVisitCount;
+    private ImageSlider productImageSlider;
+    private List<String> imageUrls = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,7 +75,9 @@ public class ProductDetailActivity extends AppCompatActivity {
     }
 
     private void initViews() {
-        productDetailImage = findViewById(R.id.productDetailImage);
+//        productDetailImage = findViewById(R.id.productDetailImage);
+        productImageSlider = findViewById(R.id.productImageSlider);
+        productDetailCategory = findViewById(R.id.productDetailCategory);
         productDetailCategory = findViewById(R.id.productDetailCategory);
         productDetailName = findViewById(R.id.productDetailName);
         productDetailPrice = findViewById(R.id.productDetailPrice);
@@ -80,6 +94,55 @@ public class ProductDetailActivity extends AppCompatActivity {
         btnBack.setOnClickListener(v -> onBackPressed());
 
         btnAddToCart.setOnClickListener(v -> addToCart());
+    }
+
+    private void loadProductImages(String productCode) {
+        RegisterAPI apiService = ServerAPI.getClient().create(RegisterAPI.class);
+        Call<ProductImageResponse> call = apiService.getProductImages(productCode);
+
+        call.enqueue(new Callback<ProductImageResponse>() {
+            @Override
+            public void onResponse(Call<ProductImageResponse> call, Response<ProductImageResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<ProductImage> images = response.body().getResult();
+                    imageUrls.clear();
+
+                    if (images != null && !images.isEmpty()) {
+                        // Get photos from API response
+                        for (ProductImage image : images) {
+                            imageUrls.add(ServerAPI.BASE_URL_IMAGE + image.getFoto());
+                        }
+                    } else if (currentProduct != null) {
+                        // Fallback to single product image
+                        imageUrls.add(currentProduct.getFoto());
+                    }
+
+                    setupImageSlider();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ProductImageResponse> call, Throwable t) {
+                // Fallback to single product image
+                if (currentProduct != null) {
+                    imageUrls.clear();
+                    imageUrls.add(currentProduct.getFoto());
+                    setupImageSlider();
+                }
+            }
+        });
+    }
+
+    private void setupImageSlider() {
+        List<SlideModel> slideModels = new ArrayList<>();
+
+        // Convert string URLs to SlideModel objects
+        for (String imageUrl : imageUrls) {
+            slideModels.add(new SlideModel(imageUrl, ScaleTypes.FIT));
+        }
+
+        // Set the slider adapter
+        productImageSlider.setImageList(slideModels);
     }
 
     private void loadProductDetails(String productCode) {
@@ -127,14 +190,17 @@ public class ProductDetailActivity extends AppCompatActivity {
     }
 
     private void displayProductDetails(Product product) {
-        // Load product image
-        Glide.with(this)
-                .load(product.getFoto())
-                .placeholder(R.drawable.placeholder_image)
-                .error(R.drawable.error_image)
-                .into(productDetailImage);
+        // Remove this block - it's causing the crash:
+        // Glide.with(this)
+        //     .load(product.getFoto())
+        //     .placeholder(R.drawable.placeholder_image)
+        //     .error(R.drawable.error_image)
+        //     .into(productDetailImage);
 
-        // Set text fields
+        // Make sure to call the image loading method instead
+        loadProductImages(product.getKode());
+
+        // Keep the rest of your existing code
         productDetailCategory.setText(product.getKategori());
         productDetailName.setText(product.getMerk());
 
@@ -146,13 +212,11 @@ public class ProductDetailActivity extends AppCompatActivity {
         productDetailStock.setText(String.valueOf(product.getStok()));
         productDetailDescription.setText(product.getDeskripsi());
 
-        int visitCount = product.getVisitCount();
-
-        // Show trending badge only for popular products (adjust threshold as needed)
+        // Show trending badge for popular products
         View trendingBadge = findViewById(R.id.trendingBadge);
-        trendingBadge.setVisibility(visitCount > 10 ? View.VISIBLE : View.GONE);
+        trendingBadge.setVisibility(product.getVisitCount() > 10 ? View.VISIBLE : View.GONE);
 
-        // Add this line to display visit count
+        // Display visit count
         productDetailVisitCount.setText(product.getVisitCount() + " views");
 
         // Enable/disable add to cart button based on stock
@@ -193,12 +257,6 @@ public class ProductDetailActivity extends AppCompatActivity {
             return;
         }
 
-        // Check if user is logged in
-        if (!LoginRequiredManager.isFullyLoggedIn(this)) {
-            LoginRequiredManager.showLoginRequiredDialog(this);
-            return;
-        }
-
         // Get current cart items
         Gson gson = new Gson();
         String jsonText = sharedPreferences.getString("listproduct", null);
@@ -224,15 +282,23 @@ public class ProductDetailActivity extends AppCompatActivity {
 
         // Add new product to cart if it doesn't exist
         if (!productExists) {
-            currentProduct.setQty(1);
-            cartItems.add(currentProduct);
+            // Create deep copy of product instead of using direct reference
+            Product cartProduct = gson.fromJson(gson.toJson(currentProduct), Product.class);
+            cartProduct.setQty(1);
+            cartItems.add(cartProduct);
         }
 
         // Save updated cart
         String updatedJson = gson.toJson(cartItems);
-        sharedPreferences.edit().putString("listproduct", updatedJson).apply();
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("listproduct", updatedJson);
+        editor.apply();
 
-        Toasty.success(this, "Added to cart", Toast.LENGTH_SHORT, true).show();
+        // Update cart badge in MainActivity using broadcast
+        Intent intent = new Intent("com.example.uts_a22202303006.UPDATE_CART_BADGE");
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+
+        Toasty.success(this, "Produk ditambahkan ke keranjang", Toast.LENGTH_SHORT, true).show();
     }
 
     @Override

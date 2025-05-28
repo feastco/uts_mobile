@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -18,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.uts_a22202303006.MainActivity;
 import com.example.uts_a22202303006.adapter.CartAdapter;
+import com.example.uts_a22202303006.auth.LoginRequiredManager;
 import com.example.uts_a22202303006.databinding.FragmentCartBinding;
 import com.example.uts_a22202303006.product.Product;
 import com.google.gson.Gson;
@@ -25,6 +27,8 @@ import com.google.gson.Gson;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Locale;
+
+import es.dmoral.toasty.Toasty;
 
 public class CartFragment extends Fragment {
 
@@ -87,6 +91,22 @@ public class CartFragment extends Fragment {
         // Perbarui total harga saat data di-load
         adapter.notifyCartTotalChanged();
 
+        // Set checkout button click listener
+        binding.btnCheckout.setOnClickListener(v -> {
+            // Check if user is fully logged in before allowing checkout
+            if (!LoginRequiredManager.isFullyLoggedIn(requireContext())) {
+                // Show a message explaining why login is required for checkout
+                Toasty.info(requireContext(), "Silahkan login untuk melanjutkan proses checkout", Toast.LENGTH_SHORT, true).show();
+
+                // Show login dialog
+                LoginRequiredManager.showLoginRequiredDialog(requireContext());
+                return;
+            }
+
+            // Continue with checkout process if logged in
+//            proceedToCheckout();
+        });
+
         return root;
     }
 
@@ -95,4 +115,5 @@ public class CartFragment extends Fragment {
         super.onDestroyView();
         binding = null; // Hindari memory leak dengan menghapus binding
     }
+
 }

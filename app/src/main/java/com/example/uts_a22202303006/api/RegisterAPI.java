@@ -1,5 +1,6 @@
 package com.example.uts_a22202303006.api;
 
+import com.example.uts_a22202303006.product.ProductImageResponse;
 import com.example.uts_a22202303006.product.ProductResponse;
 
 import okhttp3.MultipartBody;
@@ -64,4 +65,7 @@ public interface RegisterAPI {
             @Part MultipartBody.Part foto,
             @Part("username") RequestBody username
     );
+
+    @GET("get_product_images.php")
+    Call<ProductImageResponse> getProductImages(@Query("product_code") String productCode);
 }

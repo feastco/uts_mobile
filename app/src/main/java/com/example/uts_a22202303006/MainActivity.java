@@ -4,6 +4,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -19,25 +20,49 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 
 public class MainActivity extends AppCompatActivity {
 
-    private ActivityMainBinding binding; // Binding untuk mengakses komponen UI
+    private BroadcastReceiver cartUpdateReceiver;
+    private ActivityMainBinding binding;
+    private LocalBroadcastManager localBroadcastManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Inflate layout menggunakan ViewBinding
+        // Inflate layout using ViewBinding
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        // Setup BottomNavigationView dan Navigation
+        // Initialize LocalBroadcastManager
+        localBroadcastManager = LocalBroadcastManager.getInstance(this);
+
+        // Create broadcast receiver for cart updates
+        cartUpdateReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if ("com.example.uts_a22202303006.UPDATE_CART_BADGE".equals(intent.getAction())) {
+                    updateCartBadge();
+                }
+            }
+        };
+
+        // Register with LocalBroadcastManager
+        IntentFilter filter = new IntentFilter("com.example.uts_a22202303006.UPDATE_CART_BADGE");
+        localBroadcastManager.registerReceiver(cartUpdateReceiver, filter);
+
+        // Setup BottomNavigationView and Navigation
         setupNavigation();
 
-        // Inisialisasi dan perbarui badge keranjang
+        // Initialize cart badge
         updateCartBadge();
     }
+
 
     /**
      * Mengatur BottomNavigationView dengan NavController.
@@ -58,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
             int itemId = item.getItemId();
 
             // Check restricted sections (cart and profile)
-            if (itemId == R.id.navigation_cart || itemId == R.id.navigation_profile) {
+            if (itemId == R.id.navigation_profile) {
                 if (!LoginRequiredManager.isFullyLoggedIn(this)) {
                     LoginRequiredManager.showLoginRequiredDialog(this);
                     return false; // Prevent navigation
@@ -107,5 +132,13 @@ public class MainActivity extends AppCompatActivity {
             badge.clearNumber();
             badge.setVisible(false);
         }
+    }
+    @Override
+    protected void onDestroy() {
+        // Unregister receiver to prevent memory leaks
+        if (cartUpdateReceiver != null) {
+            unregisterReceiver(cartUpdateReceiver);
+        }
+        super.onDestroy();
     }
 }
