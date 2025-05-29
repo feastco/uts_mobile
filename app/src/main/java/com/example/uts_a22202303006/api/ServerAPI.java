@@ -6,8 +6,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class ServerAPI {
 
     // Localhost
-    public static final String  BASE_URL = "https://77d2-2001-448a-4003-1c76-46cf-609d-f20b-9b40.ngrok-free.app/webserver/";
-    public static final String  BASE_URL_IMAGE = "https://77d2-2001-448a-4003-1c76-46cf-609d-f20b-9b40.ngrok-free.app/webserver/images/";
+    public static final String  BASE_URL = "https://23ba-2001-448a-400d-14c0-2de8-719c-91d5-e18f.ngrok-free.app/webserver/";
+    public static final String  BASE_URL_IMAGE = "https://23ba-2001-448a-400d-14c0-2de8-719c-91d5-e18f.ngrok-free.app/webserver/images/";
 
     // Hosting
 //    public static final String  BASE_URL = "https://androidfisco.umrmaulana.my.id/api-mobile-2/";

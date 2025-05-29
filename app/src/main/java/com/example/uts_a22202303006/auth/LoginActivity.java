@@ -144,6 +144,7 @@ public class LoginActivity extends AppCompatActivity {
                             String username = json.getJSONObject("data").getString("username");
                             String email = json.getJSONObject("data").getString("email");
                             String foto = json.getJSONObject("data").getString("foto");
+                            int id = json.getJSONObject("data").getInt("id");
 
                             // Save login session
                             SharedPreferences sharedPreferences = getSharedPreferences("login_session", MODE_PRIVATE);
@@ -153,6 +154,7 @@ public class LoginActivity extends AppCompatActivity {
                             editor.putString("nama", nama);
                             editor.putString("email", email);
                             editor.putString("foto", foto);
+                            editor.putInt("id", id);
                             editor.apply();
 
                             Toasty.success(LoginActivity.this, "Login Successful", Toast.LENGTH_SHORT, true).show();

@@ -6,11 +6,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -22,6 +24,7 @@ import com.example.uts_a22202303006.auth.LoginActivity;
 import com.example.uts_a22202303006.databinding.FragmentProfileBinding;
 import com.example.uts_a22202303006.profile.About;
 import com.example.uts_a22202303006.profile.EditProfile;
+import com.example.uts_a22202303006.profile.ShippingAddressActivity;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -48,9 +51,26 @@ public class ProfileFragment extends Fragment {
         binding = FragmentProfileBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
+        SharedPreferences prefs = getActivity().getSharedPreferences("login_session", Context.MODE_PRIVATE);
+        int userId = prefs.getInt("id", -1);
+        String email = prefs.getString("email", "none");
+        Log.d("ProfileFragment", "Login status check - userId: " + userId + ", email: " + email);
+
         // Setup SwipeRefreshLayout
         binding.swipeRefresh.setColorSchemeResources(R.color.primary);
         binding.swipeRefresh.setOnRefreshListener(this::refreshUserProfile);
+
+        // Add click listener for shipping address
+        binding.alamatPengiriman.setOnClickListener(v -> {
+            // Check if user is logged in
+            if (isLoggedIn()) {
+                Intent intent = new Intent(getActivity(), ShippingAddressActivity.class);
+                startActivity(intent);
+            } else {
+                // Show login required dialog
+                showLoginRequiredDialog();
+            }
+        });
 
         // Load user profile initially
         loadUserProfile(false);
@@ -59,6 +79,28 @@ public class ProfileFragment extends Fragment {
         setupClickListeners();
 
         return root;
+    }
+
+    private boolean isLoggedIn() {
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("login_session", Context.MODE_PRIVATE);
+        int userId = sharedPreferences.getInt("id", -1);
+
+        // Add debug logging
+        Log.d("ProfileFragment", "isLoggedIn check - userId: " + userId);
+
+        return userId != -1;
+    }
+
+    private void showLoginRequiredDialog() {
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Login Required")
+                .setMessage("Please login to manage your shipping addresses")
+                .setPositiveButton("Login", (dialog, which) -> {
+                    Intent intent = new Intent(getActivity(), LoginActivity.class);
+                    startActivity(intent);
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 
     private void refreshUserProfile() {

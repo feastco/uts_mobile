@@ -120,77 +120,79 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-<!--        &lt;!&ndash; Shipping Address &ndash;&gt;-->
-<!--        <com.google.android.material.card.MaterialCardView-->
-<!--            style="@style/MenuCardStyle"-->
-<!--            android:id="@+id/alamatPengiriman">-->
 
-<!--            <LinearLayout-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:orientation="horizontal"-->
-<!--                android:gravity="center_vertical"-->
-<!--                android:padding="16dp">-->
 
-<!--                <ImageView-->
-<!--                    android:layout_width="24dp"-->
-<!--                    android:layout_height="24dp"-->
-<!--                    android:src="@drawable/location"-->
-<!--                    android:contentDescription="shipping_address"-->
-<!--                    app:tint="?attr/colorPrimary" />-->
+        <!-- Shipping Address -->
+        <com.google.android.material.card.MaterialCardView
+            style="@style/MenuCardStyle"
+            android:id="@+id/alamatPengiriman">
 
-<!--                <TextView-->
-<!--                    android:layout_width="0dp"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:layout_weight="1"-->
-<!--                    android:text="Shipping Address"-->
-<!--                    android:textColor="@color/text_primary"-->
-<!--                    android:textSize="16sp"-->
-<!--                    android:layout_marginStart="16dp"/>-->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="16dp">
 
-<!--                <ImageView-->
-<!--                    android:layout_width="24dp"-->
-<!--                    android:layout_height="24dp"-->
-<!--                    android:src="@drawable/arrow"-->
-<!--                    app:tint="@color/text_secondary"/>-->
-<!--            </LinearLayout>-->
-<!--        </com.google.android.material.card.MaterialCardView>-->
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/location"
+                    android:contentDescription="shipping_address"
+                    app:tint="?attr/colorPrimary" />
 
-<!--        &lt;!&ndash; Order History &ndash;&gt;-->
-<!--        <com.google.android.material.card.MaterialCardView-->
-<!--            style="@style/MenuCardStyle"-->
-<!--            android:id="@+id/riwayatPemesanan">-->
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Shipping Address"
+                    android:textColor="@color/text_primary"
+                    android:textSize="16sp"
+                    android:layout_marginStart="16dp"/>
 
-<!--            <LinearLayout-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:orientation="horizontal"-->
-<!--                android:gravity="center_vertical"-->
-<!--                android:padding="16dp">-->
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/arrow"
+                    app:tint="@color/text_secondary"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
-<!--                <ImageView-->
-<!--                    android:layout_width="24dp"-->
-<!--                    android:layout_height="24dp"-->
-<!--                    android:src="@drawable/history"-->
-<!--                    android:contentDescription="order_history"-->
-<!--                    app:tint="?attr/colorPrimary" />-->
+        <!-- Order History -->
+        <com.google.android.material.card.MaterialCardView
+            style="@style/MenuCardStyle"
+            android:id="@+id/riwayatPemesanan">
 
-<!--                <TextView-->
-<!--                    android:layout_width="0dp"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:layout_weight="1"-->
-<!--                    android:text="Order History"-->
-<!--                    android:textColor="@color/text_primary"-->
-<!--                    android:textSize="16sp"-->
-<!--                    android:layout_marginStart="16dp"/>-->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="16dp">
 
-<!--                <ImageView-->
-<!--                    android:layout_width="24dp"-->
-<!--                    android:layout_height="24dp"-->
-<!--                    android:src="@drawable/arrow"-->
-<!--                    app:tint="@color/text_secondary"/>-->
-<!--            </LinearLayout>-->
-<!--        </com.google.android.material.card.MaterialCardView>-->
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/history"
+                    android:contentDescription="order_history"
+                    app:tint="?attr/colorPrimary" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Order History"
+                    android:textColor="@color/text_primary"
+                    android:textSize="16sp"
+                    android:layout_marginStart="16dp"/>
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/arrow"
+                    app:tint="@color/text_secondary"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
         <!-- About -->
         <com.google.android.material.card.MaterialCardView
