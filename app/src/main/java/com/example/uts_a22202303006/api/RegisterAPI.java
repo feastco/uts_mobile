@@ -143,4 +143,8 @@ public interface RegisterAPI {
             @Field("kode_pos") String kodePos,
             @Field("is_default") int isDefault
     );
+
+    // Update endpoint to match PHP parameter name (user_id instead of userId)
+    @GET("get_order_history.php")
+    Call<ResponseBody> getOrderHistory(@Query("user_id") int userId);
 }

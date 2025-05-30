@@ -24,6 +24,7 @@ import com.example.uts_a22202303006.adapter.ShippingServiceAdapter;
 import com.example.uts_a22202303006.api.RegisterAPI;
 import com.example.uts_a22202303006.api.ServerAPI;
 import com.example.uts_a22202303006.databinding.ActivityCheckoutBinding;
+import com.example.uts_a22202303006.orders.OrderHistoryActivity;
 import com.example.uts_a22202303006.product.Product;
 import com.example.uts_a22202303006.profile.ShippingAddress;
 import com.example.uts_a22202303006.profile.ShippingAddressActivity;
@@ -83,8 +84,11 @@ public class CheckoutActivity extends AppCompatActivity {
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 if (result.getResultCode() == RESULT_OK) {
-                    // Refresh address after returning from address selection
-                    loadDefaultAddress();
+                    // Pastikan CardView shipping service langsung disembunyikan
+                    binding.servicesCardView.setVisibility(View.GONE);
+                    
+                    // Langsung refresh keseluruhan halaman, bukan hanya reset dan load address
+                    refreshCheckoutData();
                 }
             });
 
@@ -139,16 +143,17 @@ public class CheckoutActivity extends AppCompatActivity {
     }
 
     private void refreshCheckoutData() {
+        // Pertama-tama sembunyikan CardView shipping service
+        binding.servicesCardView.setVisibility(View.GONE);
+        
+        // Reset semua pilihan shipping terlebih dahulu
+        resetShippingSelection();
+        
         // Reload default address
         loadDefaultAddress();
 
-        // Reset and setup courier selection
+        // Reset dan setup courier selection
         setupCourierSelection();
-
-        // If a courier is already selected, reload shipping services
-        if (selectedCourier != null && !selectedCourier.isEmpty()) {
-            loadShippingCost();
-        }
 
         // Recalculate totals
         updateOrderSummary();
@@ -206,6 +211,9 @@ public class CheckoutActivity extends AppCompatActivity {
 
                                 // Update UI with the new default address
                                 updateAddressUI(defaultAddress);
+
+                                // Reset shipping method, service, and cost setelah address berubah
+                                resetShippingSelection();
                             }
                         }
                     }
@@ -314,12 +322,19 @@ public class CheckoutActivity extends AppCompatActivity {
 
     private void calculateShippingCost(String courier, int weight) {
         binding.progressBar.setVisibility(View.VISIBLE);
+        // Tampilkan loading spinner di dalam CardView shipping services
+        binding.servicesCardView.setVisibility(View.VISIBLE);
+        binding.servicesLoadingProgress.setVisibility(View.VISIBLE);
+        binding.recyclerViewServices.setVisibility(View.GONE);
 
         RegisterAPI apiService = ServerAPI.getClient().create(RegisterAPI.class);
         apiService.getShippingCost(501, cityId, weight, courier).enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 binding.progressBar.setVisibility(View.GONE);
+                // Sembunyikan loading spinner di dalam CardView shipping services
+                binding.servicesLoadingProgress.setVisibility(View.GONE);
+                binding.recyclerViewServices.setVisibility(View.VISIBLE);
 
                 if (response.isSuccessful() && response.body() != null) {
                     try {
@@ -355,7 +370,11 @@ public class CheckoutActivity extends AppCompatActivity {
 
                                     // Update UI with shipping services
                                     shippingServiceAdapter.submitList(new ArrayList<>(shippingServices));
-                                    binding.servicesCardView.setVisibility(View.VISIBLE);
+                                } else {
+                                    // Jika tidak ada layanan ditemukan
+                                    Toasty.info(CheckoutActivity.this, 
+                                            "Tidak ada layanan pengiriman yang tersedia", 
+                                            Toast.LENGTH_SHORT).show();
                                 }
                             } else {
                                 Toasty.error(CheckoutActivity.this,
@@ -377,6 +396,9 @@ public class CheckoutActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 binding.progressBar.setVisibility(View.GONE);
+                binding.servicesLoadingProgress.setVisibility(View.GONE);
+                binding.recyclerViewServices.setVisibility(View.VISIBLE);
+                
                 Log.e("ShippingCost", "Network error", t);
                 Toasty.error(CheckoutActivity.this,
                         "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
@@ -561,8 +583,9 @@ public class CheckoutActivity extends AppCompatActivity {
 
         Button btnViewOrders = dialog.findViewById(R.id.btnViewOrders);
         btnViewOrders.setOnClickListener(v -> {
-            // Implement navigation to orders screen if available
-            // For now, just dismiss and finish this activity
+            // Navigate to OrderHistoryActivity
+            Intent intent = new Intent(CheckoutActivity.this, OrderHistoryActivity.class);
+            startActivity(intent);
             dialog.dismiss();
             finish();
         });
@@ -617,6 +640,32 @@ public class CheckoutActivity extends AppCompatActivity {
 
         // Ensure minimum weight is 1000g (1kg)
         return Math.max(totalWeight, 1000);
+    }
+
+    // Tambahkan method untuk reset shipping method, service, dan cost
+    private void resetShippingSelection() {
+        // Reset shipping method (RadioGroup)
+        binding.radioGroupCourier.clearCheck();
+        selectedCourier = null;
+
+        // Reset shipping service
+        shippingServices.clear();
+        
+        // Buat adapter baru untuk benar-benar mereset pilihan
+        shippingServiceAdapter = new ShippingServiceAdapter(this::selectShippingService);
+        binding.recyclerViewServices.setAdapter(shippingServiceAdapter);
+        
+        // Kosongkan data dan pastikan RecyclerView kosong
+        shippingServiceAdapter.submitList(null);
+        
+        // Pastikan CardView shipping service disembunyikan dengan memberikan View.GONE
+        binding.servicesCardView.setVisibility(View.GONE);
+        binding.servicesLoadingProgress.setVisibility(View.GONE);
+        selectedService = null;
+
+        // Reset shipping cost
+        shippingCost = 0;
+        updateOrderSummary();
     }
 
     @Override

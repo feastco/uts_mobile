@@ -37,6 +37,21 @@ public class ShippingServiceAdapter extends ListAdapter<Map<String, String>, Shi
         this.listener = listener;
     }
 
+    @Override
+    public void submitList(List<Map<String, String>> list) {
+        // Reset selected position whenever list changes
+        selectedPosition = -1;
+        super.submitList(list);
+    }
+
+    // Add method to reset selection state
+    public void resetSelection() {
+        int oldSelectedPosition = selectedPosition;
+        selectedPosition = -1;
+        if (oldSelectedPosition != -1) {
+            notifyItemChanged(oldSelectedPosition);
+        }
+    }
 
     @NonNull
     @Override

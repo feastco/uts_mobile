@@ -93,4 +93,6 @@
     <color name="gray_600">#757575</color>
     <color name="grey_400">#BDBDBD</color>
     <color name="grey_800">#424242</color>
+    <color name="orange_500">#EEA342</color>
+    <color name="green_500">#83D02F</color>
 </resources>

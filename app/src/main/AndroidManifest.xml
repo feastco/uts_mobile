@@ -76,6 +76,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".orders.OrderHistoryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".orders.OrderDetailActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

@@ -22,6 +22,7 @@ import com.example.uts_a22202303006.api.RegisterAPI;
 import com.example.uts_a22202303006.api.ServerAPI;
 import com.example.uts_a22202303006.auth.LoginActivity;
 import com.example.uts_a22202303006.databinding.FragmentProfileBinding;
+import com.example.uts_a22202303006.orders.OrderHistoryActivity;
 import com.example.uts_a22202303006.profile.About;
 import com.example.uts_a22202303006.profile.EditProfile;
 import com.example.uts_a22202303006.profile.ShippingAddressActivity;
@@ -226,6 +227,17 @@ public class ProfileFragment extends Fragment {
         binding.about.setOnClickListener(v -> {
             Intent intent = new Intent(requireContext(), About.class);
             startActivity(intent);
+        });
+        
+        binding.riwayatPemesanan.setOnClickListener(v -> {
+            // Check if user is logged in
+            if (isLoggedIn()) {
+                Intent intent = new Intent(requireContext(), OrderHistoryActivity.class);
+                startActivity(intent);
+            } else {
+                // Show login required dialog
+                showLoginRequiredDialog();
+            }
         });
 
         binding.btnLogout.setOnClickListener(v -> {
