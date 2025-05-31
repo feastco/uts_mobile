@@ -57,10 +57,20 @@ public class OrderDetailActivity extends AppCompatActivity {
         binding.tvRecipientInfo.setText(recipient);
         binding.tvAddress.setText(address);
 
-        // Set shipping method
+        // Set shipping method with weight information
         String shippingMethod = order.getShipping().getCourier().toUpperCase() + " " + 
                 order.getShipping().getService();
         binding.tvShippingMethod.setText(shippingMethod);
+        
+        // Display total weight if available
+        if (order.getShipping().getTotalWeight() > 0) {
+            binding.tvTotalWeight.setVisibility(View.VISIBLE);
+            binding.tvTotalWeightLabel.setVisibility(View.VISIBLE);
+            binding.tvTotalWeight.setText(order.getShipping().getTotalWeight() + " gram");
+        } else {
+            binding.tvTotalWeight.setVisibility(View.GONE);
+            binding.tvTotalWeightLabel.setVisibility(View.GONE);
+        }
 
         // Setup order items
         binding.layoutOrderItems.removeAllViews();

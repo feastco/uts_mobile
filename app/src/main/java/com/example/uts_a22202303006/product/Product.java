@@ -28,6 +28,9 @@ public class Product {
     @SerializedName("stok") // Stok produk
     private Integer stok;
 
+    @SerializedName("weight") // Berat produk dalam gram
+    private Integer weight;
+
     @SerializedName("foto") // URL foto produk
     private String foto;
 
@@ -58,6 +61,16 @@ public class Product {
     public int getDiskonJual() { return diskonJual != null ? diskonJual : 0; }
     public int getDiskonBeli() { return diskonBeli != null ? diskonBeli : 0; }
     public Double getHargapokok() { return hargaPokok != null ? hargaPokok : 0; }
+    
+    // Improved getter for weight with null safety and default value
+    public int getWeight() { 
+        return weight != null ? weight : 0; 
+    }
+    
+    // Setter for weight
+    public void setWeight(Integer weight) { 
+        this.weight = weight; 
+    }
 
     // Getter method
     public int getVisitCount() {

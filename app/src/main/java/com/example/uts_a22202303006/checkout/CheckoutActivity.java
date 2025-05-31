@@ -83,13 +83,19 @@ public class CheckoutActivity extends AppCompatActivity {
     private final ActivityResultLauncher<Intent> addressSelectionLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
-                if (result.getResultCode() == RESULT_OK) {
-                    // Pastikan CardView shipping service langsung disembunyikan
-                    binding.servicesCardView.setVisibility(View.GONE);
-                    
-                    // Langsung refresh keseluruhan halaman, bukan hanya reset dan load address
-                    refreshCheckoutData();
-                }
+                // Always refresh when returning from address selection, regardless of result code
+                binding.swipeRefreshLayout.setRefreshing(true);
+                binding.servicesCardView.setVisibility(View.GONE);
+
+                // Give UI time to update
+                binding.getRoot().post(() -> {
+                    // Complete refresh of checkout data
+                    resetShippingSelection();
+                    loadDefaultAddress();
+                    updateOrderSummary();
+
+                    binding.swipeRefreshLayout.setRefreshing(false);
+                });
             });
 
     @Override
@@ -315,7 +321,7 @@ public class CheckoutActivity extends AppCompatActivity {
             }
 
             // Calculate shipping cost with actual origin and destination
-            calculateShippingCost(selectedCourier, 501); // 501g weight
+            calculateShippingCost(selectedCourier, calculateTotalWeight());
         });
         return selectedCourier;
     }
@@ -474,6 +480,9 @@ public class CheckoutActivity extends AppCompatActivity {
             return;
         }
 
+        // Calculate total weight for the entire order
+        int totalWeight = calculateTotalWeight();
+
         // Format cart data as JSON array for API
         JsonArray cartArray = new JsonArray();
         for (Product item : cartItems) {
@@ -484,6 +493,9 @@ public class CheckoutActivity extends AppCompatActivity {
             productObj.addProperty("price", item.getHargaJual());
             productObj.addProperty("quantity", item.getQty());
             productObj.addProperty("subtotal", item.getHargaJual() * item.getQty());
+            // Add weight information for each product
+            productObj.addProperty("weight", item.getWeight());
+            productObj.addProperty("total_item_weight", item.getWeight() * item.getQty());
             cartArray.add(productObj);
         }
         String cartJson = cartArray.toString();
@@ -491,18 +503,21 @@ public class CheckoutActivity extends AppCompatActivity {
         // Calculate grand total
         double grandTotal = cartTotal + shippingCost;
 
-        // Make API call with the actual address ID
+        // Make API call with the actual address ID and including total weight
         RegisterAPI apiService = ServerAPI.getClient().create(RegisterAPI.class);
-        apiService.processCheckout(
+        Call<ResponseBody> checkoutCall = apiService.processCheckout(
                 userId,
-                addressId, // Use the real address ID from selected address
+                addressId,
                 cartTotal,
                 shippingCost,
                 grandTotal,
                 selectedCourier,
                 selectedService,
-                cartJson
-        ).enqueue(new Callback<ResponseBody>() {
+                cartJson,
+                totalWeight // Add total weight parameter to API call
+        );
+
+        checkoutCall.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 binding.progressBar.setVisibility(View.GONE);
@@ -634,8 +649,9 @@ public class CheckoutActivity extends AppCompatActivity {
 
         int totalWeight = 0;
         for (Product item : cartItems) {
-            // Assume each product weighs 250g, multiply by quantity
-            totalWeight += 250 * item.getQty();
+            // Use actual weight from the product, with fallback to 100g if not available
+            int itemWeight = item.getWeight() > 0 ? item.getWeight() : 100;
+            totalWeight += itemWeight * item.getQty();
         }
 
         // Ensure minimum weight is 1000g (1kg)

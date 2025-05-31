@@ -140,6 +140,12 @@ public class OrderHistoryActivity extends AppCompatActivity implements OrderHist
                                     shipping.setCourier(shippingJson.get("courier").getAsString());
                                     shipping.setService(shippingJson.get("service").getAsString());
                                     shipping.setCost(shippingJson.get("cost").getAsDouble());
+                                    
+                                    // Add total weight if it exists in the API response
+                                    if (shippingJson.has("total_weight") && !shippingJson.get("total_weight").isJsonNull()) {
+                                        shipping.setTotalWeight(shippingJson.get("total_weight").getAsInt());
+                                    }
+                                    
                                     order.setShipping(shipping);
                                     
                                     // Parse payment
@@ -206,25 +212,6 @@ public class OrderHistoryActivity extends AppCompatActivity implements OrderHist
             }
         });
     }
-    
-//    // Helper class for API response parsing
-//    private static class ApiResponse {
-//        private boolean status;
-//        private String message;
-//        private List<Order> data;
-//
-//        public boolean isStatus() {
-//            return status;
-//        }
-//
-//        public String getMessage() {
-//            return message;
-//        }
-//
-//        public List<Order> getData() {
-//            return data != null ? data : new ArrayList<>();
-//        }
-//    }
     
     private void showNoOrders(String message) {
         binding.recyclerViewOrders.setVisibility(View.GONE);

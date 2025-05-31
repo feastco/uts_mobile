@@ -129,6 +129,14 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
                 .error(R.drawable.ic_launcher_foreground)
                 .into(holder.imageViewProduct);
 
+        // Display weight information
+//        if (product.getWeight() > 0) {
+//            holder.textViewWeight.setVisibility(View.VISIBLE);
+//            holder.textViewWeight.setText(product.getWeight() + "g");
+//        } else {
+//            holder.textViewWeight.setVisibility(View.GONE);
+//        }
+
         // Display initial visit count (might be 0 if not yet fetched)
         holder.textViewVisitCount.setText("Visited: " + product.getVisitCount());
 
@@ -312,6 +320,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         public TextView textViewVisitCount;
         ImageView imageViewProduct, imageViewStatus;
         TextView textViewMerk, textViewHargaJual, textViewHargaJualDiskon, textViewAvailability;
+//        TextView textViewWeight; // Added weight TextView
         ImageButton btnAddToCart, btnDetail;
         public ConstraintLayout productLayout;
 
@@ -324,6 +333,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
             textViewHargaJualDiskon = itemView.findViewById(R.id.textViewHargaJualDiskon);
             textViewAvailability = itemView.findViewById(R.id.textViewAvailability);
             textViewVisitCount = itemView.findViewById(R.id.textViewVisitCount);
+//            textViewWeight = itemView.findViewById(R.id.textViewWeight); // Initialize weight TextView
             btnAddToCart = itemView.findViewById(R.id.btnAddToCart);
             btnDetail = itemView.findViewById(R.id.btnDetail);
             productLayout = itemView.findViewById(R.id.product);

@@ -231,6 +231,30 @@
                         app:layout_constraintTop_toTopOf="@id/stockLabel"
                         tools:text="50" />
 
+                    <!-- Weight information - NEW -->
+                    <TextView
+                        android:id="@+id/weightLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="24dp"
+                        android:text="Berat:"
+                        android:textColor="@color/gray_600"
+                        android:textSize="14sp"
+                        app:layout_constraintStart_toEndOf="@id/productDetailStock"
+                        app:layout_constraintTop_toTopOf="@id/stockLabel" />
+
+                    <TextView
+                        android:id="@+id/productDetailWeight"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:textColor="@color/black"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        app:layout_constraintStart_toEndOf="@id/weightLabel"
+                        app:layout_constraintTop_toTopOf="@id/weightLabel"
+                        tools:text="500 gram" />
+
                     <TextView
                         android:id="@+id/descriptionLabel"
                         android:layout_width="match_parent"

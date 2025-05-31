@@ -47,6 +47,7 @@ public class Order {
         private String courier;
         private String service;
         private double cost;
+        private int totalWeight; // Added total weight field
         
         public String getFormattedAddress() {
             return address + ", " + city + ", " + province + " " + postalCode;
@@ -123,6 +124,14 @@ public class Order {
         
         public void setCost(double cost) {
             this.cost = cost;
+        }
+        
+        public int getTotalWeight() {
+            return totalWeight;
+        }
+        
+        public void setTotalWeight(int totalWeight) {
+            this.totalWeight = totalWeight;
         }
     }
     

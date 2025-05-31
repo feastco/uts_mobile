@@ -23,13 +23,12 @@
             android:layout_height="wrap_content"
             android:padding="12dp">
 
-            <!-- Product Image -->
-            <ImageView
+            <!-- Product Image - Improved with rounded corners -->
+            <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/imageViewProduct"
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:scaleType="centerCrop"
-                android:background="@android:color/darker_gray"
                 android:contentDescription="Product image"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
@@ -40,7 +39,7 @@
                 android:id="@+id/tvProduct"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
+                android:layout_marginStart="16dp"
                 android:layout_marginEnd="8dp"
                 android:ellipsize="end"
                 android:maxLines="2"
@@ -52,17 +51,42 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <!-- Price Section -->
+            <!-- Weight with icon -->
+            <ImageView
+                android:id="@+id/icWeight"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="6dp"
+                android:src="@drawable/ic_weight"
+                android:contentDescription="Weight icon"
+                app:tint="@color/text_secondary"
+                app:layout_constraintStart_toEndOf="@id/imageViewProduct"
+                app:layout_constraintTop_toBottomOf="@id/tvProduct" />
+
+            <TextView
+                android:id="@+id/tvWeight"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:text="500 gram"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp"
+                app:layout_constraintStart_toEndOf="@id/icWeight"
+                app:layout_constraintTop_toTopOf="@id/icWeight"
+                app:layout_constraintBottom_toBottomOf="@id/icWeight" />
+
+            <!-- Price Section - Moved below weight -->
             <LinearLayout
                 android:id="@+id/priceSection"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginStart="12dp"
-                android:layout_marginTop="6dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
                 app:layout_constraintStart_toEndOf="@id/imageViewProduct"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tvProduct">
+                app:layout_constraintTop_toBottomOf="@id/tvWeight">
 
                 <TextView
                     android:id="@+id/tvPriceLabel"
@@ -70,7 +94,7 @@
                     android:layout_height="wrap_content"
                     android:text="Harga:"
                     android:textSize="14sp"
-                    android:textColor="@color/text_primary" />
+                    android:textColor="@color/text_secondary" />
 
                 <TextView
                     android:id="@+id/tvPrice"
@@ -88,7 +112,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:text="Rp. 80.000"
-                    android:textColor="@color/text_primary"
+                    android:textColor="@color/primary"
                     android:textSize="14sp"
                     android:textStyle="bold"
                     android:visibility="visible" />
@@ -99,15 +123,14 @@
                 android:id="@+id/actionSection"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:layout_marginStart="12dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="16dp"
                 app:layout_constraintStart_toEndOf="@id/imageViewProduct"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/priceSection"
                 app:layout_constraintBottom_toBottomOf="parent">
 
-                <!-- Quantity Controls Container -->
-                <!-- Quantity Controls Container -->
+                <!-- Quantity Controls Container - Improved styling -->
                 <androidx.cardview.widget.CardView
                     android:id="@+id/quantityControlsContainer"
                     android:layout_width="wrap_content"
@@ -125,34 +148,35 @@
                         android:orientation="horizontal"
                         android:gravity="center">
 
-                        <!-- Minus Button -->
+                        <!-- Minus Button - Improved styling -->
                         <ImageButton
                             android:id="@+id/btnMinus"
                             android:layout_width="36dp"
                             android:layout_height="36dp"
-                            android:background="@null"
+                            android:background="?attr/selectableItemBackgroundBorderless"
                             android:src="@drawable/ic_remove"
                             android:contentDescription="Decrease quantity"
                             android:scaleType="centerInside"
                             tools:ignore="TouchTargetSizeCheck" />
 
-                        <!-- Quantity Display -->
+                        <!-- Quantity Display - Improved border -->
                         <TextView
                             android:id="@+id/tvQty"
                             android:layout_width="40dp"
-                            android:layout_height="wrap_content"
+                            android:layout_height="match_parent"
                             android:gravity="center"
                             android:text="1"
                             android:textColor="@color/text_primary"
                             android:textSize="16sp"
-                            android:textStyle="bold" />
+                            android:textStyle="bold"
+                            android:background="#EAEAEA" />
 
-                        <!-- Plus Button -->
+                        <!-- Plus Button - Improved styling -->
                         <ImageButton
                             android:id="@+id/btnPlus"
                             android:layout_width="36dp"
                             android:layout_height="36dp"
-                            android:background="@null"
+                            android:background="?attr/selectableItemBackgroundBorderless"
                             android:src="@drawable/ic_add"
                             android:contentDescription="Increase quantity"
                             android:scaleType="centerInside"
@@ -160,16 +184,16 @@
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
-                <!-- Delete Button -->
+                <!-- Delete Button - Improved ripple effect -->
                 <ImageButton
                     android:id="@+id/btnDelete"
                     android:layout_width="36dp"
                     android:layout_height="36dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
                     android:contentDescription="Delete item"
                     android:padding="6dp"
                     android:scaleType="fitCenter"
                     android:src="@drawable/delete"
+                    android:background="?attr/selectableItemBackgroundBorderless"
                     app:tint="@color/error"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"

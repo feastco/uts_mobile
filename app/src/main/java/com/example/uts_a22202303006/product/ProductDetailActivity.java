@@ -45,6 +45,7 @@ public class ProductDetailActivity extends AppCompatActivity {
 
     private ImageView productDetailImage;
     private TextView productDetailCategory, productDetailName, productDetailPrice, productDetailStock, productDetailDescription;
+    private TextView productDetailWeight; // Added weight TextView
     private Button btnAddToCart;
     private ImageButton btnBack;
     private Product currentProduct;
@@ -82,6 +83,7 @@ public class ProductDetailActivity extends AppCompatActivity {
         productDetailName = findViewById(R.id.productDetailName);
         productDetailPrice = findViewById(R.id.productDetailPrice);
         productDetailStock = findViewById(R.id.productDetailStock);
+        productDetailWeight = findViewById(R.id.productDetailWeight); // Initialize weight TextView
         productDetailDescription = findViewById(R.id.productDetailDescription);
         productDetailVisitCount = findViewById(R.id.productDetailVisitCount);
         btnAddToCart = findViewById(R.id.btnAddToCart);
@@ -210,6 +212,8 @@ public class ProductDetailActivity extends AppCompatActivity {
         productDetailPrice.setText(price);
 
         productDetailStock.setText(String.valueOf(product.getStok()));
+        // Set weight
+        productDetailWeight.setText(product.getWeight() + " gram");
         productDetailDescription.setText(product.getDeskripsi());
 
         // Show trending badge for popular products

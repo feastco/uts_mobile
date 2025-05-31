@@ -203,6 +203,23 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="JNE REG"
+                        android:textColor="@color/text_primary"
+                        android:layout_marginBottom="12dp" />
+
+                    <!-- Total Weight - NEW -->
+                    <TextView
+                        android:id="@+id/tvTotalWeightLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Total Weight"
+                        android:textColor="@color/text_secondary"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:id="@+id/tvTotalWeight"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="500 gram"
                         android:textColor="@color/text_primary" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>

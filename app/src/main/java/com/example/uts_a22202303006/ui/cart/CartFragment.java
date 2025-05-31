@@ -39,7 +39,7 @@ public class CartFragment extends Fragment {
     private SharedPreferences sharedPreferences; // SharedPreferences untuk menyimpan data keranjang
     private CartAdapter adapter;
     private ArrayList<Product> listproduct;
-
+    private static final int REQUEST_CHECKOUT = 1001;
     /**
      * Format harga ke dalam format Rupiah.
      */
@@ -47,6 +47,15 @@ public class CartFragment extends Fragment {
         NumberFormat formatRupiah = NumberFormat.getCurrencyInstance(new Locale("id", "ID"));
         return formatRupiah.format(harga).replace(",00", "");
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Auto-refresh cart data when returning to this fragment
+        loadCartItems();
+    }
+
+
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -58,9 +67,6 @@ public class CartFragment extends Fragment {
         binding = FragmentCartBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        // List untuk menyimpan produk dari keranjang
-        ArrayList<Product> listproduct = new ArrayList<>();
-
         // Setup swipe refresh
         binding.swipeRefreshLayout.setColorSchemeResources(
                 android.R.color.holo_blue_bright,
@@ -71,47 +77,19 @@ public class CartFragment extends Fragment {
 
         binding.swipeRefreshLayout.setOnRefreshListener(this::loadCartItems);
 
-        // Load data keranjang dari SharedPreferences
+        // Load data from SharedPreferences
         sharedPreferences = requireActivity().getSharedPreferences("product", MODE_PRIVATE);
-        if (sharedPreferences.contains("listproduct")) {
-            Gson gson = new Gson();
-            String jsonText = sharedPreferences.getString("listproduct", null);
-            Product[] productArray = gson.fromJson(jsonText, Product[].class);
-            for (Product product : productArray) {
-                listproduct.add(product);
-            }
-            Log.i("Info pref", listproduct.toString());
-        }
 
-        // Inisialisasi adapter untuk RecyclerView
-        CartAdapter adapter = new CartAdapter(listproduct);
-        RecyclerView recyclerView = binding.recyclerView;
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 1));
-        recyclerView.setAdapter(adapter);
-
-        // Listener untuk memperbarui total harga
-        adapter.setOnCartChangedListener(total -> {
-            TextView tvTotalHarga = binding.tvTotalHarga;
-            tvTotalHarga.setText(formatRupiah(total));
-        });
-
-        // Listener untuk memperbarui badge jumlah produk
-        adapter.setOnCartQtyChangedListener(totalQty -> {
-            if (getActivity() instanceof MainActivity) {
-                ((MainActivity) getActivity()).updateCartBadge();
-            }
-        });
-
-        // Perbarui total harga saat data di-load
-        adapter.notifyCartTotalChanged();
+        // Initial load of cart items
+        loadCartItems();
 
         // Set checkout button click listener
         binding.btnCheckout.setOnClickListener(v -> {
             // Check if user is fully logged in before allowing checkout
             if (!LoginRequiredManager.isFullyLoggedIn(requireContext())) {
                 // Show a message explaining why login is required for checkout
-                Toasty.info(requireContext(), "Silahkan login untuk melanjutkan proses checkout", Toast.LENGTH_SHORT, true).show();
+                Toasty.info(requireContext(), "Silahkan login untuk melanjutkan proses checkout",
+                        Toast.LENGTH_SHORT, true).show();
 
                 // Show login dialog
                 LoginRequiredManager.showLoginRequiredDialog(requireContext());
@@ -125,24 +103,24 @@ public class CartFragment extends Fragment {
         return root;
     }
 
-    private void loadCartItems() {
-        listproduct.clear();
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CHECKOUT) {
+            // Always refresh cart when returning from checkout
+            loadCartItems();
 
-        // Load data from SharedPreferences
-        sharedPreferences = requireActivity().getSharedPreferences("product", MODE_PRIVATE);
-        if (sharedPreferences.contains("listproduct")) {
-            Gson gson = new Gson();
-            String jsonText = sharedPreferences.getString("listproduct", null);
-            Product[] productArray = gson.fromJson(jsonText, Product[].class);
-            for (Product product : productArray) {
-                listproduct.add(product);
+            // Force badge update
+            if (getActivity() instanceof MainActivity) {
+                ((MainActivity) getActivity()).updateCartBadge();
             }
-            Log.i("Info pref", listproduct.toString());
         }
+    }
 
+    private void loadCartItems() {
         // Initialize adapter if needed
         if (adapter == null) {
-            adapter = new CartAdapter(listproduct);
+            adapter = new CartAdapter(new ArrayList<>());
             binding.recyclerView.setHasFixedSize(true);
             binding.recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 1));
             binding.recyclerView.setAdapter(adapter);
@@ -157,12 +135,45 @@ public class CartFragment extends Fragment {
                     ((MainActivity) getActivity()).updateCartBadge();
                 }
             });
-        } else {
-            adapter.notifyDataSetChanged();
         }
 
-        // Update total price
+        // Load data from SharedPreferences
+        sharedPreferences = requireActivity().getSharedPreferences("product", MODE_PRIVATE);
+
+        // Create new list instead of clearing existing one (prevents NPE)
+        ArrayList<Product> cartItems = new ArrayList<>();
+
+        if (sharedPreferences.contains("listproduct")) {
+            Gson gson = new Gson();
+            String jsonText = sharedPreferences.getString("listproduct", null);
+            if (jsonText != null && !jsonText.equals("[]")) {
+                Product[] productArray = gson.fromJson(jsonText, Product[].class);
+                for (Product product : productArray) {
+                    cartItems.add(product);
+                }
+            }
+        }
+
+        // Update adapter with new list
+        listproduct = cartItems;
+        adapter = new CartAdapter(listproduct);
+        binding.recyclerView.setAdapter(adapter);
+
+        // Re-setup listeners
+        adapter.setOnCartChangedListener(total -> {
+            binding.tvTotalHarga.setText(formatRupiah(total));
+        });
+
+        adapter.setOnCartQtyChangedListener(totalQty -> {
+            if (getActivity() instanceof MainActivity) {
+                ((MainActivity) getActivity()).updateCartBadge();
+            }
+        });
+
+        // Update total price and badge
+        adapter.notifyDataSetChanged();
         adapter.notifyCartTotalChanged();
+        adapter.notifyCartQtyChanged();
 
         // Stop the refresh animation
         binding.swipeRefreshLayout.setRefreshing(false);
@@ -180,7 +191,7 @@ public class CartFragment extends Fragment {
         // Start CheckoutActivity with cart items
         Intent intent = new Intent(getActivity(), CheckoutActivity.class);
         intent.putExtra("CART_TOTAL", calculateCartTotal(cartItems));
-        startActivity(intent);
+        startActivityForResult(intent, REQUEST_CHECKOUT);
     }
 
     private ArrayList<Product> getCartItems() {

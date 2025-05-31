@@ -72,7 +72,15 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
 
         // Set product name and quantity
         holder.tvProduct.setText(product.getMerk() != null ? product.getMerk() : "");
-        holder.tvQty.setText(String.valueOf(product.getQty()));
+        holder.tvQty.setText(String.valueOf(product.getQty())); // Updated from tvQty
+
+        // Display weight information with better formatting
+        if (holder.tvWeight != null) {
+            int itemWeight = product.getWeight();
+            int totalWeight = itemWeight * product.getQty();
+            holder.tvWeight.setText(totalWeight + " gram");
+            holder.tvWeight.setVisibility(View.VISIBLE);
+        }
 
         // Handle price display based on discount
         if (product.getDiskonJual() > 0) {
@@ -264,8 +272,10 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
 
     // ViewHolder class untuk item keranjang
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvProduct, tvPrice, tvHargaDiskon, tvQty;
-        ImageButton btnDelete, btnPlus, btnMinus; // Changed from Button to ImageButton
+        TextView tvProduct, tvPrice, tvHargaDiskon, tvWeight;
+        ImageButton btnDelete;
+        TextView tvQty; // Keep the original ID name to match the layout
+        ImageButton btnPlus, btnMinus; // Keep the original ID names to match the layout
         ImageView imageViewProduct;
 
         public ViewHolder(@NonNull View itemView) {
@@ -273,10 +283,11 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
             tvProduct = itemView.findViewById(R.id.tvProduct);
             tvPrice = itemView.findViewById(R.id.tvPrice);
             tvHargaDiskon = itemView.findViewById(R.id.tvHargaDiskon);
-            tvQty = itemView.findViewById(R.id.tvQty);
+            tvQty = itemView.findViewById(R.id.tvQty); // Match the ID in the layout
+            tvWeight = itemView.findViewById(R.id.tvWeight);
             btnDelete = itemView.findViewById(R.id.btnDelete);
-            btnPlus = itemView.findViewById(R.id.btnPlus);
-            btnMinus = itemView.findViewById(R.id.btnMinus);
+            btnPlus = itemView.findViewById(R.id.btnPlus); // Match the ID in the layout  
+            btnMinus = itemView.findViewById(R.id.btnMinus); // Match the ID in the layout
             imageViewProduct = itemView.findViewById(R.id.imageViewProduct);
         }
     }

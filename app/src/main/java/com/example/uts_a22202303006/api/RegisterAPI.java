@@ -94,7 +94,8 @@ public interface RegisterAPI {
             @Field("grand_total") double grandTotal,
             @Field("courier") String courier,
             @Field("courier_service") String courierService,
-            @Field("products") String cartJson
+            @Field("products") String cartJson,
+            @Field("total_weight") int totalWeight // Added total_weight parameter
     );
 
     @GET("get_shipping_address.php")
