@@ -89,13 +89,16 @@ public interface RegisterAPI {
     Call<ResponseBody> processCheckout(
             @Field("user_id") int userId,
             @Field("shipping_address_id") int addressId,
+            @Field("origin_id") int originId,
             @Field("total_product_amount") double totalProductAmount,
             @Field("shipping_cost") double shippingCost,
             @Field("grand_total") double grandTotal,
             @Field("courier") String courier,
             @Field("courier_service") String courierService,
-            @Field("products") String cartJson,
-            @Field("total_weight") int totalWeight // Added total_weight parameter
+            @Field("products") String cartJson,  // Make sure this matches the PHP parameter name
+            @Field("total_weight") int totalWeight,
+            @Field("payment_method") String paymentMethod,
+            @Field("lama_kirim") String lamaKirim
     );
 
     @GET("get_shipping_address.php")
@@ -148,4 +151,11 @@ public interface RegisterAPI {
     // Update endpoint to match PHP parameter name (user_id instead of userId)
     @GET("get_order_history.php")
     Call<ResponseBody> getOrderHistory(@Query("user_id") int userId);
+
+    @Multipart
+    @POST("upload_bukti_bayar.php")
+    Call<ResponseBody> uploadPaymentProof(
+            @Part("order_id") RequestBody orderId,
+            @Part MultipartBody.Part paymentProof
+    );
 }

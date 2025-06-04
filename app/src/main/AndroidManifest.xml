@@ -35,6 +35,20 @@
         </provider>
 
         <activity
+            android:name=".orders.OrderHistoryActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.profile.ProfileFragment">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
+        <activity
+            android:name=".orders.OrderDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".checkout.PaymentDetailsActivity"
+            android:exported="false" />
+        <activity
             android:name=".profile.AddShippingAddressActivity"
             android:exported="false" />
         <activity
@@ -76,12 +90,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".orders.OrderHistoryActivity"
-            android:exported="false" />
-        <activity
-            android:name=".orders.OrderDetailActivity"
-            android:exported="false" />
     </application>
 
 </manifest>

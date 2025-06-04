@@ -8,4 +8,6 @@
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">50%</item>
     </style>
+    <style name="Theme.UTS_A22202303006.AppBarOverlay" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar" />
+    <style name="Theme.UTS_A22202303006.PopupOverlay" parent="ThemeOverlay.MaterialComponents.Light" />
 </resources>

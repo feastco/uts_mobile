@@ -2,6 +2,7 @@ package com.example.uts_a22202303006;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -61,6 +62,12 @@ public class MainActivity extends AppCompatActivity {
 
         // Initialize cart badge
         updateCartBadge();
+        
+        // Check if we should navigate to profile tab
+        if (getIntent().getBooleanExtra("open_profile", false)) {
+            // Navigate to the profile tab
+            binding.navView.setSelectedItemId(R.id.navigation_profile);
+        }
     }
 
 
@@ -99,45 +106,85 @@ public class MainActivity extends AppCompatActivity {
      * Memperbarui badge keranjang dengan jumlah total produk di keranjang.
      */
     public void updateCartBadge() {
+        // Check if binding or navView is null
+        if (binding == null || binding.navView == null) {
+            return;
+        }
+
         // Ambil data keranjang dari SharedPreferences
         SharedPreferences sharedPreferences = getSharedPreferences("product", MODE_PRIVATE);
         String jsonText = sharedPreferences.getString("listproduct", null);
 
         // Dapatkan BottomNavigationView dan BadgeDrawable
-        BottomNavigationView bottomNavigationView = findViewById(R.id.nav_view);
-        BadgeDrawable badge = bottomNavigationView.getOrCreateBadge(R.id.navigation_cart);
+        BottomNavigationView bottomNavigationView = binding.navView;
 
-        if (jsonText != null) {
-            // Parsing data keranjang
-            Gson gson = new Gson();
-            Type type = new TypeToken<ArrayList<Product>>() {}.getType();
-            ArrayList<Product> listProduct = gson.fromJson(jsonText, type);
+        try {
+            BadgeDrawable badge = bottomNavigationView.getOrCreateBadge(R.id.navigation_cart);
 
-            // Hitung jumlah total produk
-            int totalQty = 0;
-            for (Product product : listProduct) {
-                totalQty += product.getQty();
-            }
+            if (jsonText != null) {
+                // Parsing data keranjang
+                Gson gson = new Gson();
+                Type type = new TypeToken<ArrayList<Product>>() {
+                }.getType();
+                ArrayList<Product> listProduct = gson.fromJson(jsonText, type);
 
-            // Perbarui visibilitas dan angka pada badge
-            if (totalQty > 0) {
-                badge.setVisible(true);
-                badge.setNumber(totalQty);
+                // Hitung jumlah total produk
+                int totalQty = 0;
+                for (Product product : listProduct) {
+                    totalQty += product.getQty();
+                }
+
+                // Perbarui visibilitas dan angka pada badge
+                if (totalQty > 0) {
+                    badge.setVisible(true);
+                    badge.setNumber(totalQty);
+                } else {
+                    badge.clearNumber();
+                    badge.setVisible(false);
+                }
             } else {
+                // Sembunyikan badge jika keranjang kosong atau null
                 badge.clearNumber();
                 badge.setVisible(false);
             }
-        } else {
-            // Sembunyikan badge jika keranjang kosong atau null
-            badge.clearNumber();
-            badge.setVisible(false);
+        } catch (Exception e) {
+            Log.e("MainActivity", "Error updating cart badge", e);
         }
     }
+
+    public void updateCartBadge(int count) {
+        // Check if binding or navView is null
+        if (binding == null || binding.navView == null) {
+            return;
+        }
+
+        try {
+            if (count > 0) {
+                BadgeDrawable badge = binding.navView.getOrCreateBadge(R.id.navigation_cart);
+                badge.setVisible(true);
+                badge.setNumber(count);
+            } else {
+                BadgeDrawable badge = binding.navView.getBadge(R.id.navigation_cart);
+                if (badge != null) {
+                    badge.setVisible(false);
+                    badge.clearNumber();
+                }
+            }
+        } catch (Exception e) {
+            Log.e("MainActivity", "Error updating cart badge with count", e);
+        }
+    }
+
     @Override
     protected void onDestroy() {
         // Unregister receiver to prevent memory leaks
         if (cartUpdateReceiver != null) {
-            unregisterReceiver(cartUpdateReceiver);
+            try {
+                // Use LocalBroadcastManager to unregister, not the Activity context
+                localBroadcastManager.unregisterReceiver(cartUpdateReceiver);
+            } catch (Exception e) {
+                Log.e("MainActivity", "Error unregistering receiver: " + e.getMessage(), e);
+            }
         }
         super.onDestroy();
     }

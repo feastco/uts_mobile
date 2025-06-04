@@ -1,5 +1,9 @@
 package com.example.uts_a22202303006.models;
 
+import android.util.Log;
+
+import com.google.gson.annotations.SerializedName;
+
 import java.util.List;
 
 public class Order {
@@ -11,6 +15,10 @@ public class Order {
     private Shipping shipping;
     private Payment payment;
     private List<OrderItem> items;
+    
+    // Add all possible locations for payment_method
+    @SerializedName("payment_method")
+    private String rootPaymentMethod;
     
     // Default constructor needed for manual population
     public Order() {}
@@ -47,7 +55,10 @@ public class Order {
         private String courier;
         private String service;
         private double cost;
-        private int totalWeight; // Added total weight field
+        
+        // Handle multiple possibilities for weight field name
+        @SerializedName(value = "weight", alternate = {"total_weight"})
+        private int totalWeight; // Maps to 'weight' in API
         
         public String getFormattedAddress() {
             return address + ", " + city + ", " + province + " " + postalCode;
@@ -140,6 +151,10 @@ public class Order {
         private double shipping;
         private double total;
         
+        // Try both method and payment_method in the payment object
+        @SerializedName(value = "method", alternate = {"payment_method"}) 
+        private String paymentMethod; // Add method field to match API structure
+        
         // Getters and Setters
         public double getSubtotal() {
             return subtotal;
@@ -163,6 +178,14 @@ public class Order {
         
         public void setTotal(double total) {
             this.total = total;
+        }
+        
+        public String getPaymentMethod() {
+            return paymentMethod;
+        }
+        
+        public void setPaymentMethod(String paymentMethod) {
+            this.paymentMethod = paymentMethod;
         }
     }
     
@@ -229,5 +252,21 @@ public class Order {
     
     public void setItems(List<OrderItem> items) {
         this.items = items;
+    }
+    
+    // Updated method to check both possible locations and print debug info
+    public String getPaymentMethod() {
+        Log.d("OrderDetail", "Checking payment method sources:");
+        Log.d("OrderDetail", "Root payment_method: " + rootPaymentMethod);
+        
+        if (payment != null) {
+            Log.d("OrderDetail", "Payment object method: " + payment.getPaymentMethod());
+            
+            if (payment.getPaymentMethod() != null) {
+                return payment.getPaymentMethod();
+            }
+        }
+        
+        return rootPaymentMethod;
     }
 }

@@ -2,7 +2,10 @@ package com.example.uts_a22202303006.ui.cart;
 
 import static android.content.Context.MODE_PRIVATE;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,8 +16,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -55,7 +60,40 @@ public class CartFragment extends Fragment {
         loadCartItems();
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        
+        // Register to receive cart update broadcasts
+        IntentFilter filter = new IntentFilter("com.example.uts_a22202303006.UPDATE_CART_BADGE");
+        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(cartUpdateReceiver, filter);
+    }
 
+    // Create broadcast receiver
+    private final BroadcastReceiver cartUpdateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if ("com.example.uts_a22202303006.UPDATE_CART_BADGE".equals(intent.getAction())) {
+                // Force reload cart items
+                if (isAdded()) {
+                    loadCartItems();
+                }
+            }
+        }
+    };
+
+    @Override
+    public void onDestroy() {
+        // Unregister receiver to prevent memory leaks
+        try {
+            if (cartUpdateReceiver != null) {
+                LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(cartUpdateReceiver);
+            }
+        } catch (Exception e) {
+            Log.e("CartFragment", "Error unregistering receiver", e);
+        }
+        super.onDestroy();
+    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -173,10 +211,36 @@ public class CartFragment extends Fragment {
         // Update total price and badge
         adapter.notifyDataSetChanged();
         adapter.notifyCartTotalChanged();
-        adapter.notifyCartQtyChanged();
+        
+        // Update badge safely
+        try {
+            adapter.notifyCartQtyChanged();
+            
+            // Add null check before calling updateCartBadge
+            if (getActivity() instanceof MainActivity && isAdded()) {
+                MainActivity activity = (MainActivity) getActivity();
+                activity.updateCartBadge(cartItems.size());
+            }
+        } catch (Exception e) {
+            Log.e("CartFragment", "Error updating cart badge", e);
+        }
 
+        // Force UI update even if data hasn't changed
+        if (binding != null && binding.recyclerView != null) {
+            binding.recyclerView.post(() -> {
+                if (adapter != null) {
+                    adapter.notifyDataSetChanged();
+                    if (isAdded() && getActivity() instanceof MainActivity) {
+                        ((MainActivity) getActivity()).updateCartBadge();
+                    }
+                }
+            });
+        }
+        
         // Stop the refresh animation
-        binding.swipeRefreshLayout.setRefreshing(false);
+        if (binding != null && binding.swipeRefreshLayout != null) {
+            binding.swipeRefreshLayout.setRefreshing(false);
+        }
     }
 
     private void proceedToCheckout() {

@@ -2,6 +2,7 @@ package com.example.uts_a22202303006.orders;
 
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -45,11 +46,38 @@ public class OrderDetailActivity extends AppCompatActivity {
     }
 
     private void displayOrderDetails() {
+        // Add debugging log to see full order data
+        Log.d("OrderDetail", "Full order data: " + new Gson().toJson(order));
+        
         // Order info
         binding.tvOrderNumber.setText("#" + order.getOrderNumber());
         binding.tvOrderDate.setText(order.getOrderDate());
         binding.tvOrderStatus.setText(order.getStatus().getOrder());
         binding.tvPaymentStatus.setText(order.getStatus().getPayment());
+
+        // Set payment method with better error handling
+        String paymentMethod = null;
+        try {
+            if (order.getPayment() != null) {
+                paymentMethod = order.getPayment().getPaymentMethod();
+                Log.d("OrderDetail", "Payment method from payment object: " + paymentMethod);
+            }
+        } catch (Exception e) {
+            Log.e("OrderDetail", "Error getting payment method from payment object", e);
+        }
+        
+        if (paymentMethod != null) {
+            if (paymentMethod.equalsIgnoreCase("transfer")) {
+                binding.tvPaymentMethod.setText("Bank Transfer");
+            } else if (paymentMethod.equalsIgnoreCase("cod")) {
+                binding.tvPaymentMethod.setText("Cash on Delivery");
+            } else {
+                binding.tvPaymentMethod.setText(paymentMethod);
+            }
+        } else {
+            binding.tvPaymentMethod.setText("Not specified");
+            Log.d("OrderDetail", "Payment method is null");
+        }
 
         // Set shipping address
         String address = order.getShipping().getFormattedAddress();
@@ -62,12 +90,27 @@ public class OrderDetailActivity extends AppCompatActivity {
                 order.getShipping().getService();
         binding.tvShippingMethod.setText(shippingMethod);
         
-        // Display total weight if available
-        if (order.getShipping().getTotalWeight() > 0) {
-            binding.tvTotalWeight.setVisibility(View.VISIBLE);
-            binding.tvTotalWeightLabel.setVisibility(View.VISIBLE);
-            binding.tvTotalWeight.setText(order.getShipping().getTotalWeight() + " gram");
-        } else {
+        // Display total weight with better error handling
+        try {
+            if (order.getShipping() != null) {
+                int weight = order.getShipping().getTotalWeight();
+                Log.d("OrderDetail", "Total weight value: " + weight);
+                
+                if (weight > 0) {
+                    binding.tvTotalWeight.setVisibility(View.VISIBLE);
+                    binding.tvTotalWeightLabel.setVisibility(View.VISIBLE);
+                    binding.tvTotalWeight.setText(weight + " gram");
+                } else {
+                    binding.tvTotalWeight.setVisibility(View.GONE);
+                    binding.tvTotalWeightLabel.setVisibility(View.GONE);
+                }
+            } else {
+                Log.d("OrderDetail", "Shipping object is null");
+                binding.tvTotalWeight.setVisibility(View.GONE);
+                binding.tvTotalWeightLabel.setVisibility(View.GONE);
+            }
+        } catch (Exception e) {
+            Log.e("OrderDetail", "Error displaying weight", e);
             binding.tvTotalWeight.setVisibility(View.GONE);
             binding.tvTotalWeightLabel.setVisibility(View.GONE);
         }

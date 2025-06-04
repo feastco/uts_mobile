@@ -17,9 +17,11 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.uts_a22202303006.R;
+import com.example.uts_a22202303006.adapter.CheckoutProductAdapter;
 import com.example.uts_a22202303006.adapter.ShippingServiceAdapter;
 import com.example.uts_a22202303006.api.RegisterAPI;
 import com.example.uts_a22202303006.api.ServerAPI;
@@ -28,6 +30,7 @@ import com.example.uts_a22202303006.orders.OrderHistoryActivity;
 import com.example.uts_a22202303006.product.Product;
 import com.example.uts_a22202303006.profile.ShippingAddress;
 import com.example.uts_a22202303006.profile.ShippingAddressActivity;
+import com.example.uts_a22202303006.utils.AppConfig;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -39,10 +42,12 @@ import org.json.JSONObject;
 import java.lang.reflect.Type;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import es.dmoral.toasty.Toasty;
 import okhttp3.ResponseBody;
@@ -71,13 +76,19 @@ public class CheckoutActivity extends AppCompatActivity {
     // Shipping information
     private String selectedCourier;
     private String selectedService;
+    private String selectedPaymentMethod = null; // No default payment method
+    private String selectedDeliveryTime = ""; // Add this missing variable declaration
 
+    private int originId = AppConfig.STORE_CITY_ID; // Use the city ID from centralized config
 
     // For shipping services
     private List<Map<String, String>> shippingServices = new ArrayList<>();
     private ShippingServiceAdapter shippingServiceAdapter;
     // For address selection
     private ShippingAddress defaultAddress;
+
+    // Add this new variable to track available couriers
+    private List<String> availableCouriers = new ArrayList<>();
 
     // Activity result launcher for address selection
     private final ActivityResultLauncher<Intent> addressSelectionLauncher = registerForActivityResult(
@@ -97,6 +108,9 @@ public class CheckoutActivity extends AppCompatActivity {
                     binding.swipeRefreshLayout.setRefreshing(false);
                 });
             });
+
+    // For products
+    private CheckoutProductAdapter productAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,6 +136,11 @@ public class CheckoutActivity extends AppCompatActivity {
         binding.recyclerViewServices.setLayoutManager(new LinearLayoutManager(this));
         binding.recyclerViewServices.setAdapter(shippingServiceAdapter);
 
+        // Setup products RecyclerView
+        productAdapter = new CheckoutProductAdapter(this);
+        binding.recyclerViewProducts.setLayoutManager(new LinearLayoutManager(this));
+        binding.recyclerViewProducts.setAdapter(productAdapter);
+
         // Setup swipe refresh
         binding.swipeRefreshLayout.setColorSchemeResources(
                 android.R.color.holo_blue_bright,
@@ -138,6 +157,9 @@ public class CheckoutActivity extends AppCompatActivity {
         // Setup courier selection
         setupCourierSelection();
 
+        // Setup payment method selection
+        setupPaymentMethodSelection();
+
         // Setup checkout button
         binding.btnProcessOrder.setOnClickListener(v -> processOrder());
 
@@ -146,26 +168,36 @@ public class CheckoutActivity extends AppCompatActivity {
 
         // Load default address
         loadDefaultAddress();
+
+        // Load cart items
+        loadProductsFromCart();
     }
 
     private void refreshCheckoutData() {
         // Pertama-tama sembunyikan CardView shipping service
         binding.servicesCardView.setVisibility(View.GONE);
-        
+
         // Reset semua pilihan shipping terlebih dahulu
         resetShippingSelection();
-        
+
         // Reload default address
         loadDefaultAddress();
 
         // Reset dan setup courier selection
         setupCourierSelection();
 
+        // Reload products
+        loadProductsFromCart();
+
         // Recalculate totals
         updateOrderSummary();
 
         // Stop the refresh animation
         binding.swipeRefreshLayout.setRefreshing(false);
+
+        // Clear payment method selection
+        binding.radioGroupPayment.clearCheck();
+        selectedPaymentMethod = null;
     }
 
     private void loadShippingCost() {
@@ -272,26 +304,121 @@ public class CheckoutActivity extends AppCompatActivity {
 
         binding.recyclerViewAddresses.removeAllViews();
         binding.recyclerViewAddresses.addView(addressView);
+        
+        // After updating address, check which couriers are available
+        checkAvailableCouriers();
     }
 
-    private void showNoAddressView() {
-        binding.tvNoAddress.setVisibility(View.VISIBLE);
-        binding.recyclerViewAddresses.setVisibility(View.GONE);
-
-        // Reset address information
-        addressId = -1;
-        recipientName = null;
-        phoneNumber = null;
-        fullAddress = null;
-        provinceId = -1;
-        provinceName = null;
-        cityId = -1;
-        cityName = null;
-        postalCode = null;
+    // Add new method to check which couriers are available for the selected city
+    private void checkAvailableCouriers() {
+        // Reset available couriers
+        availableCouriers.clear();
+        
+        // Hide all courier options initially
+        binding.rbJne.setVisibility(View.GONE);
+        binding.rbTiki.setVisibility(View.GONE);
+        binding.rbPos.setVisibility(View.GONE);
+        
+        // Show loading indicator
+        binding.courierLoadingProgress.setVisibility(View.VISIBLE);
+        
+        // If cityId is invalid, don't proceed
+        if (cityId <= 0) {
+            binding.courierLoadingProgress.setVisibility(View.GONE);
+            return;
+        }
+        
+        // Minimum weight for checking
+        int minWeight = 1000; // 1kg
+        
+        // List of couriers to check
+        List<String> couriersToCheck = Arrays.asList("jne", "tiki", "pos");
+        AtomicInteger pendingRequests = new AtomicInteger(couriersToCheck.size());
+        
+        RegisterAPI apiService = ServerAPI.getClient().create(RegisterAPI.class);
+        
+        // Check each courier
+        for (String courier : couriersToCheck) {
+            apiService.getShippingCost(AppConfig.STORE_CITY_ID, cityId, minWeight, courier)
+                .enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        try {
+                            if (response.isSuccessful() && response.body() != null) {
+                                String jsonResponse = response.body().string();
+                                JsonObject jsonObject = JsonParser.parseString(jsonResponse).getAsJsonObject();
+                                
+                                if (jsonObject != null && jsonObject.has("rajaongkir")) {
+                                    JsonObject rajaongkir = jsonObject.getAsJsonObject("rajaongkir");
+                                    JsonObject status = rajaongkir.getAsJsonObject("status");
+                                    
+                                    if (status.get("code").getAsInt() == 200) {
+                                        JsonArray results = rajaongkir.getAsJsonArray("results");
+                                        
+                                        if (results != null && results.size() > 0) {
+                                            JsonObject courierObject = results.get(0).getAsJsonObject();
+                                            JsonArray costs = courierObject.getAsJsonArray("costs");
+                                            
+                                            // If courier has any costs/services, consider it available
+                                            if (costs != null && costs.size() > 0) {
+                                                availableCouriers.add(courier);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        } catch (Exception e) {
+                            Log.e("CheckCouriers", "Error parsing response for " + courier, e);
+                        }
+                        
+                        // When all requests are done, update UI
+                        if (pendingRequests.decrementAndGet() == 0) {
+                            updateCourierUI();
+                        }
+                    }
+                    
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        Log.e("CheckCouriers", "Network error for " + courier, t);
+                        
+                        // When all requests are done, update UI
+                        if (pendingRequests.decrementAndGet() == 0) {
+                            updateCourierUI();
+                        }
+                    }
+                });
+        }
+    }
+    
+    // Add method to update courier UI based on available couriers
+    private void updateCourierUI() {
+        runOnUiThread(() -> {
+            // Hide loading indicator
+            binding.courierLoadingProgress.setVisibility(View.GONE);
+            
+            // Show courier options based on availability
+            if (availableCouriers.contains("jne")) {
+                binding.rbJne.setVisibility(View.VISIBLE);
+            }
+            
+            if (availableCouriers.contains("tiki")) {
+                binding.rbTiki.setVisibility(View.VISIBLE);
+            }
+            
+            if (availableCouriers.contains("pos")) {
+                binding.rbPos.setVisibility(View.VISIBLE);
+            }
+            
+            // Show message if no couriers are available
+            if (availableCouriers.isEmpty()) {
+                Toasty.warning(CheckoutActivity.this, 
+                    "No delivery services available for this location", 
+                    Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     private String setupCourierSelection() {
-
         selectedCourier = null;
         selectedService = null;
 
@@ -334,7 +461,7 @@ public class CheckoutActivity extends AppCompatActivity {
         binding.recyclerViewServices.setVisibility(View.GONE);
 
         RegisterAPI apiService = ServerAPI.getClient().create(RegisterAPI.class);
-        apiService.getShippingCost(501, cityId, weight, courier).enqueue(new Callback<ResponseBody>() {
+        apiService.getShippingCost(AppConfig.STORE_CITY_ID, cityId, weight, courier).enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 binding.progressBar.setVisibility(View.GONE);
@@ -378,8 +505,8 @@ public class CheckoutActivity extends AppCompatActivity {
                                     shippingServiceAdapter.submitList(new ArrayList<>(shippingServices));
                                 } else {
                                     // Jika tidak ada layanan ditemukan
-                                    Toasty.info(CheckoutActivity.this, 
-                                            "Tidak ada layanan pengiriman yang tersedia", 
+                                    Toasty.info(CheckoutActivity.this,
+                                            "Tidak ada layanan pengiriman yang tersedia",
                                             Toast.LENGTH_SHORT).show();
                                 }
                             } else {
@@ -404,7 +531,7 @@ public class CheckoutActivity extends AppCompatActivity {
                 binding.progressBar.setVisibility(View.GONE);
                 binding.servicesLoadingProgress.setVisibility(View.GONE);
                 binding.recyclerViewServices.setVisibility(View.VISIBLE);
-                
+
                 Log.e("ShippingCost", "Network error", t);
                 Toasty.error(CheckoutActivity.this,
                         "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
@@ -414,6 +541,7 @@ public class CheckoutActivity extends AppCompatActivity {
 
     private void selectShippingService(Map<String, String> service) {
         selectedService = service.get("service");
+        selectedDeliveryTime = service.get("etd") + " hari"; // Store delivery time
         try {
             shippingCost = Double.parseDouble(service.get("cost"));
             updateOrderSummary();
@@ -471,6 +599,14 @@ public class CheckoutActivity extends AppCompatActivity {
             return;
         }
 
+        // Validate payment method
+        if (selectedPaymentMethod == null || selectedPaymentMethod.isEmpty()) {
+            Toasty.warning(this, "Please select a payment method", Toast.LENGTH_SHORT, true).show();
+            binding.progressBar.setVisibility(View.GONE);
+            binding.btnProcessOrder.setEnabled(true);
+            return;
+        }
+
         // Load cart items for checkout
         ArrayList<Product> cartItems = getCartItems();
         if (cartItems == null || cartItems.isEmpty()) {
@@ -487,34 +623,35 @@ public class CheckoutActivity extends AppCompatActivity {
         JsonArray cartArray = new JsonArray();
         for (Product item : cartItems) {
             JsonObject productObj = new JsonObject();
-            productObj.addProperty("product_id", item.getKode());
-            productObj.addProperty("product_code", item.getKode());
-            productObj.addProperty("product_name", item.getMerk());
-            productObj.addProperty("price", item.getHargaJual());
-            productObj.addProperty("quantity", item.getQty());
-            productObj.addProperty("subtotal", item.getHargaJual() * item.getQty());
-            // Add weight information for each product
-            productObj.addProperty("weight", item.getWeight());
-            productObj.addProperty("total_item_weight", item.getWeight() * item.getQty());
+            productObj.addProperty("product_code", item.getKode());  // Make sure this matches exactly
+            productObj.addProperty("product_name", item.getMerk());  // Make sure this matches exactly
+            productObj.addProperty("price", item.getHargaJual());    // Make sure this matches exactly
+            productObj.addProperty("quantity", item.getQty());       // Make sure this matches exactly
+            // Remove any fields not needed by the API to avoid confusion
             cartArray.add(productObj);
         }
         String cartJson = cartArray.toString();
-
+        
+        Log.d("CheckoutDebug", "Cart JSON: " + cartJson);  // Log the exact JSON being sent
+    
         // Calculate grand total
         double grandTotal = cartTotal + shippingCost;
 
-        // Make API call with the actual address ID and including total weight
+        // Make API call with the actual address ID and including origin ID
         RegisterAPI apiService = ServerAPI.getClient().create(RegisterAPI.class);
         Call<ResponseBody> checkoutCall = apiService.processCheckout(
                 userId,
                 addressId,
+                originId,
                 cartTotal,
                 shippingCost,
                 grandTotal,
                 selectedCourier,
                 selectedService,
                 cartJson,
-                totalWeight // Add total weight parameter to API call
+                totalWeight,
+                selectedPaymentMethod,
+                selectedDeliveryTime  // Add delivery time parameter
         );
 
         checkoutCall.enqueue(new Callback<ResponseBody>() {
@@ -530,9 +667,16 @@ public class CheckoutActivity extends AppCompatActivity {
 
                         JSONObject jsonResponse = new JSONObject(responseBody);
                         if (jsonResponse.getBoolean("status")) {
-                            // Order successful
                             clearCart();
-                            showSuccessDialog(jsonResponse.getJSONObject("order").getString("order_number"));
+
+                            // Check payment method and handle differently
+                            if ("transfer".equals(selectedPaymentMethod)) {
+                                // For transfer payment, go to payment details screen
+                                navigateToPaymentDetails(jsonResponse);
+                            } else {
+                                // For COD, show success dialog
+                                showSuccessDialog(jsonResponse.getJSONObject("order").getString("order_number"));
+                            }
                         } else {
                             // Order failed
                             Toasty.error(CheckoutActivity.this, jsonResponse.getString("message"), Toast.LENGTH_LONG, true).show();
@@ -556,6 +700,36 @@ public class CheckoutActivity extends AppCompatActivity {
                 Toasty.error(CheckoutActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_LONG, true).show();
             }
         });
+    }
+
+    private void navigateToPaymentDetails(JSONObject responseData) {
+        try {
+            JSONObject orderData = responseData.getJSONObject("order");
+            JSONObject paymentInfo = responseData.getJSONObject("payment_info");
+            
+            Log.d("CheckoutDebug", "Navigating to payment details for order: " + orderData.getString("order_number"));
+            
+            Intent intent = new Intent(this, PaymentDetailsActivity.class);
+            intent.putExtra("ORDER_ID", orderData.getInt("order_id"));
+            intent.putExtra("ORDER_NUMBER", orderData.getString("order_number"));
+            intent.putExtra("GRAND_TOTAL", orderData.getDouble("grand_total"));
+            intent.putExtra("BANK_NAME", paymentInfo.getString("bank_name"));
+            intent.putExtra("ACCOUNT_NUMBER", paymentInfo.getString("account_number"));
+            intent.putExtra("ACCOUNT_NAME", paymentInfo.getString("account_name"));
+            intent.putExtra("INSTRUCTIONS", paymentInfo.getString("instructions"));
+            
+            // Use explicit flag combination to ensure proper navigation
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            
+            startActivity(intent);
+            finish(); // Make sure we're finishing this activity
+            
+            // Add force finish to ensure no return to cart
+            Runtime.getRuntime().gc(); // Request garbage collection
+        } catch (Exception e) {
+            Log.e("CheckoutDebug", "Error navigating to payment details", e);
+            Toasty.error(this, "Error displaying payment details: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 
     // Helper method to get cart items
@@ -605,6 +779,11 @@ public class CheckoutActivity extends AppCompatActivity {
             finish();
         });
 
+        // Find and set payment method text
+        TextView tvPaymentMethod = dialog.findViewById(R.id.tvPaymentMethod);
+        String paymentMethodText = selectedPaymentMethod.equals("transfer") ? "Bank Transfer" : "Cash on Delivery";
+        tvPaymentMethod.setText(paymentMethodText);
+
         // Show dialog with animation
         dialog.show();
 
@@ -617,11 +796,17 @@ public class CheckoutActivity extends AppCompatActivity {
     }
 
     private void clearCart() {
-        // Clear the cart in SharedPreferences
+        // Clear the cart in SharedPreferences - use commit() for immediate effect
         SharedPreferences sharedPreferences = getSharedPreferences("product", MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString("listproduct", "[]"); // Empty array
-        editor.apply();
+        editor.commit(); // Use commit() instead of apply() for immediate effect
+        
+        // Broadcast that the cart has been cleared
+        Intent intent = new Intent("com.example.uts_a22202303006.UPDATE_CART_BADGE");
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+        
+        Log.d("CheckoutDebug", "Cart has been cleared");
     }
 
     private ArrayList<Product> getCartItemsFromSharedPreferences() {
@@ -666,27 +851,61 @@ public class CheckoutActivity extends AppCompatActivity {
 
         // Reset shipping service
         shippingServices.clear();
-        
+
         // Buat adapter baru untuk benar-benar mereset pilihan
         shippingServiceAdapter = new ShippingServiceAdapter(this::selectShippingService);
         binding.recyclerViewServices.setAdapter(shippingServiceAdapter);
-        
+
         // Kosongkan data dan pastikan RecyclerView kosong
         shippingServiceAdapter.submitList(null);
-        
+
         // Pastikan CardView shipping service disembunyikan dengan memberikan View.GONE
         binding.servicesCardView.setVisibility(View.GONE);
         binding.servicesLoadingProgress.setVisibility(View.GONE);
         selectedService = null;
+        
+        // Reset available couriers
+        availableCouriers.clear();
+        
+        // Hide courier options
+        binding.rbJne.setVisibility(View.GONE);
+        binding.rbTiki.setVisibility(View.GONE);
+        binding.rbPos.setVisibility(View.GONE);
 
         // Reset shipping cost
         shippingCost = 0;
         updateOrderSummary();
     }
 
+    private void setupPaymentMethodSelection() {
+        binding.radioGroupPayment.setOnCheckedChangeListener((group, checkedId) -> {
+            if (checkedId == R.id.rbTransfer) {
+                selectedPaymentMethod = "transfer";
+            } else if (checkedId == R.id.rbCod) {
+                selectedPaymentMethod = "cod";
+            }
+        });
+    }
+
     @Override
     public boolean onSupportNavigateUp() {
         finish();
         return true;
+    }
+
+    /**
+     * Load products from the cart into the product list in checkout
+     */
+    private void loadProductsFromCart() {
+        ArrayList<Product> cartItems = getCartItems();
+        
+        if (cartItems != null && !cartItems.isEmpty()) {
+            productAdapter.setProducts(cartItems);
+            binding.noProductsLayout.setVisibility(View.GONE);
+            binding.recyclerViewProducts.setVisibility(View.VISIBLE);
+        } else {
+            binding.noProductsLayout.setVisibility(View.VISIBLE);
+            binding.recyclerViewProducts.setVisibility(View.GONE);
+        }
     }
 }

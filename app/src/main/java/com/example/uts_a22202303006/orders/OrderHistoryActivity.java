@@ -97,6 +97,7 @@ public class OrderHistoryActivity extends AppCompatActivity implements OrderHist
                     if (response.isSuccessful() && response.body() != null) {
                         String jsonResponse = response.body().string();
                         Log.d(TAG, "API Response: " + jsonResponse);
+                        Log.d("OrderHistoryRaw", "API Response: " + jsonResponse);
                         
                         // Parse JSON manually to ensure field mapping is correct
                         JsonObject jsonObject = JsonParser.parseString(jsonResponse).getAsJsonObject();
@@ -140,12 +141,13 @@ public class OrderHistoryActivity extends AppCompatActivity implements OrderHist
                                     shipping.setCourier(shippingJson.get("courier").getAsString());
                                     shipping.setService(shippingJson.get("service").getAsString());
                                     shipping.setCost(shippingJson.get("cost").getAsDouble());
-                                    
-                                    // Add total weight if it exists in the API response
-                                    if (shippingJson.has("total_weight") && !shippingJson.get("total_weight").isJsonNull()) {
-                                        shipping.setTotalWeight(shippingJson.get("total_weight").getAsInt());
+
+                                    // Explicitly set weight (was missing)
+                                    if (shippingJson.has("weight") && !shippingJson.get("weight").isJsonNull()) {
+                                        shipping.setTotalWeight(shippingJson.get("weight").getAsInt());
+                                        Log.d(TAG, "Setting weight: " + shippingJson.get("weight").getAsInt());
                                     }
-                                    
+
                                     order.setShipping(shipping);
                                     
                                     // Parse payment
@@ -154,6 +156,13 @@ public class OrderHistoryActivity extends AppCompatActivity implements OrderHist
                                     payment.setSubtotal(paymentJson.get("subtotal").getAsDouble());
                                     payment.setShipping(paymentJson.get("shipping").getAsDouble());
                                     payment.setTotal(paymentJson.get("total").getAsDouble());
+
+                                    // Explicitly set payment method (was missing)
+                                    if (paymentJson.has("method") && !paymentJson.get("method").isJsonNull()) {
+                                        payment.setPaymentMethod(paymentJson.get("method").getAsString());
+                                        Log.d(TAG, "Setting payment method: " + paymentJson.get("method").getAsString());
+                                    }
+
                                     order.setPayment(payment);
                                     
                                     // Parse items
@@ -229,7 +238,21 @@ public class OrderHistoryActivity extends AppCompatActivity implements OrderHist
     
     @Override
     public boolean onSupportNavigateUp() {
-        finish();
+        navigateToHome();
         return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        navigateToHome();
+    }
+
+    private void navigateToHome() {
+        // Navigate to MainActivity with a flag to open the profile tab
+        Intent intent = new Intent(this, com.example.uts_a22202303006.MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.putExtra("open_profile", true);  // Add an extra to indicate we want to open profile tab
+        startActivity(intent);
+        finish();
     }
 }

@@ -107,6 +107,53 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- Products Section - ADDED THIS NEW SECTION -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Your Products"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recyclerViewProducts"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:nestedScrollingEnabled="false" />
+
+                    <LinearLayout
+                        android:id="@+id/noProductsLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="16dp"
+                        android:visibility="gone">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="No products in cart"
+                            android:textColor="@color/text_secondary" />
+                    </LinearLayout>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
             <!-- Courier Selection -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
@@ -127,6 +174,13 @@
                         android:text="Shipping Method"
                         android:textSize="16sp"
                         android:textStyle="bold" />
+
+                    <ProgressBar
+                        android:id="@+id/courierLoadingProgress"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:visibility="gone" />
 
                     <RadioGroup
                         android:id="@+id/radioGroupCourier"
@@ -197,6 +251,48 @@
                             android:layout_gravity="center"
                             android:visibility="gone" />
                     </FrameLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Payment Method -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Payment Method"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <RadioGroup
+                        android:id="@+id/radioGroupPayment"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp">
+
+                        <RadioButton
+                            android:id="@+id/rbTransfer"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Bank Transfer" />
+
+                        <RadioButton
+                            android:id="@+id/rbCod"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Cash on Delivery (COD)" />
+                    </RadioGroup>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -300,7 +396,7 @@
                 android:layout_marginTop="16dp"
                 android:background="@color/primary"
                 android:paddingVertical="12dp"
-                android:text="Process Order"
+                android:text="Process Checkout"
                 android:textAllCaps="false"
                 android:textColor="@color/white"
                 android:textStyle="bold" />

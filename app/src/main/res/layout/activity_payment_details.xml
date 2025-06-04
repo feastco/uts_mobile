@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".checkout.PaymentDetailsActivity">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/Theme.UTS_A22202303006.AppBarOverlay">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:popupTheme="@style/Theme.UTS_A22202303006.PopupOverlay" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="4dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Transfer Details"
+                        android:textAppearance="?attr/textAppearanceHeadline6"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="16dp"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Please transfer to:"
+                        android:textAppearance="?attr/textAppearanceBody2" />
+
+                    <TextView
+                        android:id="@+id/tvBankName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:textAppearance="?attr/textAppearanceBody1"
+                        android:textStyle="bold"
+                        tools:text="BCA" />
+
+                    <TextView
+                        android:id="@+id/tvAccountNumber"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?attr/textAppearanceBody1"
+                        android:textIsSelectable="true"
+                        tools:text="0912256378221" />
+
+                    <TextView
+                        android:id="@+id/tvAccountName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?attr/textAppearanceBody1"
+                        tools:text="Elisha Mart" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:text="Transfer Amount:"
+                        android:textAppearance="?attr/textAppearanceBody2" />
+
+                    <TextView
+                        android:id="@+id/tvTransferAmount"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?attr/textAppearanceHeadline6"
+                        android:textColor="@color/black"
+                        android:textStyle="bold"
+                        tools:text="Rp 250.000" />
+
+                    <TextView
+                        android:id="@+id/tvOrderNumber"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:textAppearance="?attr/textAppearanceBody2"
+                        tools:text="Order #2506033379" />
+
+                    <TextView
+                        android:id="@+id/tvInstructions"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:textAppearance="?attr/textAppearanceBody2"
+                        android:textStyle="italic"
+                        tools:text="Please transfer the exact amount and upload your payment proof." />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="4dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Upload Payment Proof"
+                        android:textAppearance="?attr/textAppearanceHeadline6"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="16dp"/>
+
+                    <ImageView
+                        android:id="@+id/imgPaymentProof"
+                        android:layout_width="match_parent"
+                        android:layout_height="200dp"
+                        android:layout_marginBottom="16dp"
+                        android:background="#EEEEEE"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/ic_photo"
+                        android:contentDescription="Payment proof image" />
+
+                    <Button
+                        android:id="@+id/btnSelectImage"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Select Image" />
+
+                    <Button
+                        android:id="@+id/btnUploadProof"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:enabled="false"
+                        android:text="Upload Payment Proof" />
+
+                    <ProgressBar
+                        android:id="@+id/progressBar"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="8dp"
+                        android:visibility="gone" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <Button
+                android:id="@+id/btnViewOrders"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="View My Orders"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

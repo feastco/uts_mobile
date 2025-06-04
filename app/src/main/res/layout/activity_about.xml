@@ -1,201 +1,171 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fillViewport="true"
     android:background="@color/white">
 
-    <!-- Toolbar -->
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="0dp"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        app:titleTextColor="@color/black"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        android:descendantFocusability="blocksDescendants">
 
-        <ImageView
-            android:id="@+id/ivBack"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/arrow"
-            android:rotation="180"
-            android:layout_gravity="start" />
+        <!-- Toolbar -->
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="0dp"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/white"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            app:titleTextColor="@color/black"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="Tentang Kami"
-            android:textColor="@color/black"
-            android:textSize="20sp"
-            android:textStyle="bold" />
-    </androidx.appcompat.widget.Toolbar>
-
-    <!-- Tentang Kami Section -->
-<!--    <TextView-->
-<!--        android:layout_marginHorizontal="10dp"-->
-<!--        android:id="@+id/txtTentangKami"-->
-<!--        android:layout_width="0dp"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:text="Tentang Kami"-->
-<!--        android:textColor="@color/text_primary"-->
-<!--        android:textSize="18sp"-->
-<!--        android:textStyle="bold"-->
-<!--        app:layout_constraintTop_toBottomOf="@id/toolbar"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        android:layout_marginTop="16dp" />-->
-
-    <ImageView
-        android:id="@+id/imgTentangKami"
-        android:layout_width="0dp"
-        android:layout_height="200dp"
-        android:layout_marginHorizontal="10dp"
-        android:scaleType="centerCrop"
-        app:layout_constraintTop_toBottomOf="@id/toolbar"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp" />
-
-    <!-- Store Address Section -->
-    <TextView
-        android:id="@+id/txtStoreAddress"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="10dp"
-        android:text="Alamat Toko:"
-        android:textColor="@color/text_primary"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        app:layout_constraintTop_toBottomOf="@id/imgTentangKami"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp" />
-
-    <TextView
-        android:id="@+id/txtAddressDetails"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Jl. Prof. Dr. Hamka No.Km 2, Tambakaji, Kec. Ngaliyan, Kota Semarang, Jawa Tengah 50185"
-        android:layout_marginHorizontal="10dp"
-        android:textColor="@color/text_secondary"
-        android:textSize="16sp"
-        app:layout_constraintTop_toBottomOf="@id/txtStoreAddress"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="8dp" />
-
-    <!-- Jam Operasional Section -->
-    <TextView
-        android:id="@+id/txtJamOperasional"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Jam Operasional"
-        android:layout_marginHorizontal="10dp"
-        android:textColor="@color/text_primary"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        app:layout_constraintTop_toBottomOf="@id/txtAddressDetails"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp" />
-
-    <TextView
-        android:id="@+id/txtJamDetails"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Senin - Minggu: 09.00 - 21.00 WIB"
-        android:textColor="@color/text_secondary"
-        android:layout_marginHorizontal="10dp"
-        android:textSize="16sp"
-        app:layout_constraintTop_toBottomOf="@id/txtJamOperasional"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="8dp" />
-
-    <!--    &lt;!&ndash; Contact Section &ndash;&gt;-->
-    <!--    <TextView-->
-    <!--        android:id="@+id/txtContact"-->
-    <!--        android:layout_width="0dp"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        android:text="Kontak Kami:"-->
-    <!--        android:textColor="@color/text_primary"-->
-    <!--        android:textSize="18sp"-->
-    <!--        android:textStyle="bold"-->
-    <!--        app:layout_constraintTop_toBottomOf="@id/txtAddressDetails"-->
-    <!--        app:layout_constraintStart_toStartOf="parent"-->
-    <!--        app:layout_constraintEnd_toEndOf="parent"-->
-    <!--        android:layout_marginTop="16dp" />-->
-
-    <!--    <TextView-->
-    <!--        android:id="@+id/txtContactDetails"-->
-    <!--        android:layout_width="0dp"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        android:text="Telepon: +62 812-3456-7890\nEmail: info@tokocontoh.com"-->
-    <!--        android:textColor="@color/text_secondary"-->
-    <!--        android:textSize="16sp"-->
-    <!--        app:layout_constraintTop_toBottomOf="@id/txtContact"-->
-    <!--        app:layout_constraintStart_toStartOf="parent"-->
-    <!--        app:layout_constraintEnd_toEndOf="parent"-->
-    <!--        android:layout_marginTop="8dp" />-->
-
-    <!-- Social Media Section -->
-    <com.google.android.material.card.MaterialCardView
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:background="@color/white"
-        app:cardElevation="4dp"
-        app:cardCornerRadius="8dp"
-        app:layout_constraintTop_toBottomOf="@id/txtJamDetails"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp"
-            android:gravity="center_horizontal">
+            <ImageView
+                android:id="@+id/ivBack"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/arrow"
+                android:rotation="180"
+                android:layout_gravity="start" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Hubungi Kami"
-                android:textStyle="bold"
-                android:textSize="14sp" />
+                android:layout_gravity="center"
+                android:text="Tentang Kami"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+        </androidx.appcompat.widget.Toolbar>
+
+        <!-- Image Section -->
+        <ImageView
+            android:id="@+id/imgTentangKami"
+            android:layout_width="0dp"
+            android:layout_height="200dp"
+            android:layout_marginHorizontal="16dp"
+            android:scaleType="centerCrop"
+            app:layout_constraintTop_toBottomOf="@id/toolbar"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="16dp" />
+
+        <!-- Store Address Section -->
+        <TextView
+            android:id="@+id/txtStoreAddress"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:text="Alamat Toko:"
+            android:textColor="@color/text_primary"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintTop_toBottomOf="@id/imgTentangKami"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="16dp" />
+            
+        <TextView
+            android:id="@+id/txtAddressDetails"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:text="Jl. Prof. Dr. Hamka No.Km 2, Tambakaji, Kec. Ngaliyan, Kota Semarang, Jawa Tengah 50185"
+            android:textColor="@color/text_secondary"
+            android:textSize="16sp"
+            android:autoLink="map"
+            app:layout_constraintTop_toBottomOf="@id/txtStoreAddress"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="8dp" />
+
+        <!-- Operating Hours Section -->
+        <TextView
+            android:id="@+id/txtJamOperasional"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Jam Operasional"
+            android:layout_marginHorizontal="16dp"
+            android:textColor="@color/text_primary"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintTop_toBottomOf="@id/txtAddressDetails"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="16dp" />
+
+        <TextView
+            android:id="@+id/txtJamDetails"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Senin - Minggu: 09.00 - 21.00 WIB"
+            android:textColor="@color/text_secondary"
+            android:layout_marginHorizontal="16dp"
+            android:textSize="16sp"
+            app:layout_constraintTop_toBottomOf="@id/txtJamOperasional"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="8dp" />
+
+        <!-- Social Media Section -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:background="@color/white"
+            app:cardElevation="4dp"
+            app:cardCornerRadius="8dp"
+            app:layout_constraintTop_toBottomOf="@id/txtJamDetails"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginBottom="16dp">
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="8dp">
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:padding="16dp">
 
-                <ImageButton
-                    android:id="@+id/instagram"
-                    style="@style/SocialButtonStyle"
-                    android:src="@drawable/instagram"
-                    android:contentDescription="instagram" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hubungi Kami"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
 
-                <ImageButton
-                    android:id="@+id/whatsapp"
-                    style="@style/SocialButtonStyle"
-                    android:src="@drawable/whatsapp"
-                    android:contentDescription="whatsapp"
-                    android:layout_marginStart="24dp" />
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal">
 
-                <!--                <ImageButton-->
-                <!--                    android:id="@+id/website"-->
-                <!--                    style="@style/SocialButtonStyle"-->
-                <!--                    android:src="@drawable/website"-->
-                <!--                    android:contentDescription="website"-->
-                <!--                    android:layout_marginStart="24dp" />-->
+                    <ImageButton
+                        android:id="@+id/instagram"
+                        style="@style/SocialButtonStyle"
+                        android:contentDescription="Instagram"
+                        android:src="@drawable/instagram" />
+
+                    <ImageButton
+                        android:id="@+id/whatsapp"
+                        style="@style/SocialButtonStyle"
+                        android:layout_marginStart="24dp"
+                        android:contentDescription="WhatsApp"
+                        android:src="@drawable/whatsapp" />
+
+                    <ImageButton
+                        android:id="@+id/maps"
+                        style="@style/SocialButtonStyle"
+                        android:layout_marginStart="24dp"
+                        android:contentDescription="Google Maps"
+                        android:src="@drawable/gmaps" />
+                </LinearLayout>
             </LinearLayout>
-        </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
-</androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.card.MaterialCardView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>
